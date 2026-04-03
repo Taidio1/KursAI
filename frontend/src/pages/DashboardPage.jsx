@@ -1,34 +1,82 @@
 import { useAuth } from '../contexts/AuthContext'
+import { useDashboardData } from '../hooks/useDashboardData'
 import Navbar from '../components/Navbar'
 import ActionHero from '../components/ActionHero'
 import PathCard from '../components/PathCard'
 
-const paths = [
-  { slug: 'wspolna', title: 'Ścieżka Wspólna', subtitle: 'Fundamenty dla każdego', icon: '🏁', progress: 100, lessonsDone: 20, lessonsTotal: 20 },
-  { slug: 'no_code', title: 'Ścieżka A – No-Code', subtitle: 'Automatyzacja procesów z wykorzystaniem n8n oraz Make.', icon: '🛠', progress: 0, lessonsDone: 0, lessonsTotal: 15 },
-  { slug: 'kod', title: 'Ścieżka B – Kod', subtitle: 'Inżynieria AI dla deweloperów', icon: '💻', progress: 45, lessonsDone: 9, lessonsTotal: 20, streak: 7 },
-]
-
 export default function DashboardPage() {
   const { user } = useAuth()
+  const { paths, lastLesson, streak, loading, error } = useDashboardData()
   
+  if (loading) {
+    return (
+      <div style={{ 
+        height: '100vh', 
+        background: 'var(--bg-primary)', 
+        color: 'var(--text-primary)', 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center',
+        fontSize: '18px'
+      }}>
+        Ładowanie Twoich postępów...
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div style={{ 
+        height: '100vh', 
+        background: 'var(--bg-primary)', 
+        color: '#ef4444', 
+        display: 'flex', 
+        flexDirection: 'column',
+        alignItems: 'center', 
+        justifyContent: 'center',
+        gap: '20px'
+      }}>
+        <div style={{ fontSize: '20px', fontWeight: '700' }}>Wystąpił błąd podczas ładowania danych</div>
+        <div style={{ fontSize: '14px', opacity: 0.8 }}>{error}</div>
+        <button 
+          onClick={() => window.location.reload()}
+          style={{ 
+            background: 'var(--bg-secondary)', 
+            border: '1px solid var(--border-subtle)', 
+            color: 'white', 
+            padding: '10px 20px', 
+            borderRadius: '8px',
+            cursor: 'pointer'
+          }}
+        >
+          Spróbuj ponownie
+        </button>
+      </div>
+    )
+  }
+
+  const totalProgress = paths.length > 0 
+    ? Math.round(paths.reduce((acc, p) => acc + p.progress, 0) / paths.length) 
+    : 0
+
   return (
     <div style={{ 
-      minHeight: '100vh', 
+      height: '100vh', 
       background: 'var(--bg-primary)', 
       color: 'var(--text-primary)', 
       padding: '24px',
       display: 'flex', 
       flexDirection: 'column', 
       gap: '40px',
-      overflowY: 'auto'
+      overflowY: 'auto',
+      scrollbarGutter: 'stable'
     }}>
       <Navbar user={user} />
       
       <main style={{ maxWidth: '1200px', margin: '0 auto', width: '100%', display: 'flex', flexDirection: 'column', gap: '48px' }}>
         <ActionHero 
-          lastLesson={{ title: '04. Architektura Multi-Agent', pathName: 'Ścieżka B', icon: '💻' }} 
-          streak={7} 
+          lastLesson={lastLesson} 
+          streak={streak} 
         />
         
         <section>
@@ -37,11 +85,11 @@ export default function DashboardPage() {
               <h4 style={{ fontSize: '18px', fontWeight: '700', marginBottom: '4px' }}>Twoje ścieżki nauki</h4>
               <p style={{ color: 'var(--text-muted)', fontSize: '13px' }}>Wybierz ścieżkę, aby zobaczyć szczegóły</p>
             </div>
-            <div style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Suma postępów: 45%</div>
+            <div style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Suma postępów: {totalProgress}%</div>
           </div>
           
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px' }}>
-            {paths.map(path => <PathCard key={path.slug} path={path} />)}
+            {paths.map(path => <PathCard key={path.id} path={path} />)}
           </div>
         </section>
       </main>
