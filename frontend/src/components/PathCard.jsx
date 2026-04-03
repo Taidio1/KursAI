@@ -3,11 +3,17 @@ export default function PathCard({ path }) {
   const isComplete = path.progress === 100
 
   return (
-    <div style={{
-      background: 'var(--bg-secondary)', 
-      border: `1px solid ${isStarted ? (isComplete ? 'var(--border-subtle)' : 'var(--cyan-border)') : 'var(--border-subtle)'}`,
-      borderRadius: '20px', padding: '24px', transition: 'transform 0.2s'
-    }}>
+    <div 
+      onClick={() => path.slug && (window.location.href = `/course/${path.slug}`)}
+      style={{
+        background: 'var(--bg-secondary)', 
+        border: `1px solid ${isStarted ? (isComplete ? 'var(--border-subtle)' : 'var(--cyan-border)') : 'var(--border-subtle)'}`,
+        borderRadius: '20px', padding: '24px', transition: 'all 0.2s',
+        cursor: 'pointer'
+      }}
+      onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.borderColor = 'var(--cyan)' }}
+      onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = isStarted ? (isComplete ? 'var(--border-subtle)' : 'var(--cyan-border)') : 'var(--border-subtle)' }}
+    >
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
         <div style={{ 
           width: '48px', height: '48px', 

@@ -23,12 +23,15 @@ export default function ActionHero({ lastLesson, streak = 7 }) {
           Twoja ostatnia lekcja • {lastLesson?.pathName ?? 'Wprowadzenie'}
         </p>
         
-        <button style={{
-          background: 'var(--cyan-gradient)', color: 'white', padding: '14px 36px',
-          borderRadius: '12px', fontWeight: '700', fontSize: '16px', border: 'none',
-          cursor: 'pointer', boxShadow: '0 10px 30px rgba(6, 182, 212, 0.3)',
-          display: 'flex', alignItems: 'center', gap: '12px'
-        }}>
+        <button 
+          onClick={() => (window.location.href = '/course/wspolna')} // Currently only 'wspolna' exists
+          style={{
+            background: 'var(--cyan-gradient)', color: 'white', padding: '14px 36px',
+            borderRadius: '12px', fontWeight: '700', fontSize: '16px', border: 'none',
+            cursor: 'pointer', boxShadow: '0 10px 30px rgba(6, 182, 212, 0.3)',
+            display: 'flex', alignItems: 'center', gap: '12px'
+          }}
+        >
           Kontynuuj naukę <span style={{ fontSize: '20px' }}>→</span>
         </button>
       </div>
