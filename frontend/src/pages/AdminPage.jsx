@@ -7,7 +7,6 @@ import { syncNotionContent } from '../services/adminService'
 export default function AdminPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
-  const [secret, setSecret] = useState('')
   const [status, setStatus] = useState('idle') // idle, loading, success, error
   const [result, setResult] = useState(null)
   const [errorMsg, setErrorMsg] = useState('')
@@ -18,11 +17,10 @@ export default function AdminPage() {
   }
 
   async function handleSync() {
-    if (!secret) return
     setStatus('loading')
     setErrorMsg('')
     try {
-      const data = await syncNotionContent(secret)
+      const data = await syncNotionContent()
       setResult(data)
       setStatus('success')
     } catch (err) {
@@ -32,144 +30,117 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="admin-page">
-      <div className="admin-container">
-        <h1 className="admin-title">Panel Administratora</h1>
-        <p className="admin-user">Zalogowany jako: {user?.email}</p>
+    <div style={styles.adminPage}>
+      <div style={styles.adminContainer}>
+        <h1 style={styles.adminTitle}>Panel Administratora</h1>
+        <p style={styles.adminUser}>Zalogowany jako: {user?.email}</p>
 
-        <div className="sync-box">
-          <input
-            type="password"
-            className="admin-input"
-            placeholder="Sekret administracyjny..."
-            value={secret}
-            onChange={(e) => setSecret(e.target.value)}
-            disabled={status === 'loading'}
-          />
+        <div style={styles.syncBox}>
           <button 
-            className={`admin-button ${status === 'loading' ? 'loading' : ''}`}
+            style={{
+              ...styles.adminButton,
+              ...(status === 'loading' ? styles.adminButtonLoading : {}),
+              ...(status === 'loading' ? { opacity: 0.5, cursor: 'not-allowed' } : {})
+            }}
             onClick={handleSync}
-            disabled={status === 'loading' || !secret}
+            disabled={status === 'loading'}
           >
             {status === 'loading' ? 'Synchronizowanie...' : 'Synchronizuj z Notion'}
           </button>
         </div>
 
         {status === 'success' && result && (
-          <div className="status-box success">
-            <h3>✅ Sukces!</h3>
+          <div style={{ ...styles.statusBox, ...styles.statusSuccess }}>
+            <h3 style={{ marginBottom: '8px' }}>✅ Sukces!</h3>
             <p>Lekcje: {result.lessons_synced}</p>
             <p>Slajdy: {result.slides_created}</p>
           </div>
         )}
 
         {status === 'error' && (
-          <div className="status-box error">
-            <h3>❌ Błąd</h3>
+          <div style={{ ...styles.statusBox, ...styles.statusError }}>
+            <h3 style={{ marginBottom: '8px' }}>❌ Błąd</h3>
             <p>{errorMsg}</p>
           </div>
         )}
 
-        <button className="logout-btn" onClick={handleLogout}>
+        <button style={styles.logoutBtn} onClick={handleLogout}>
           Wyloguj się
         </button>
       </div>
-
-      <style jsx>{`
-        .admin-page {
-          height: 100vh;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background: var(--bg-primary);
-          padding: 20px;
-        }
-        .admin-container {
-          width: 100%;
-          max-width: 400px;
-          background: var(--bg-secondary);
-          padding: 32px;
-          border-radius: var(--radius-lg);
-          border: 1px solid var(--border-subtle);
-          text-align: center;
-          box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-        .admin-title {
-          font-size: 24px;
-          margin-bottom: 8px;
-          color: var(--cyan-light);
-          text-transform: uppercase;
-          letter-spacing: 1px;
-        }
-        .admin-user {
-          color: var(--text-secondary);
-          font-size: 14px;
-          margin-bottom: 32px;
-        }
-        .sync-box {
-          display: flex;
-          flex-direction: column;
-          gap: 16px;
-        }
-        .admin-input {
-          padding: 12px 16px;
-          background: rgba(255,255,255,0.05);
-          border: 1px solid var(--border-subtle);
-          border-radius: var(--radius-md);
-          color: white;
-          outline: none;
-          transition: border-color 0.2s;
-        }
-        .admin-input:focus {
-          border-color: var(--cyan-light);
-        }
-        .admin-button {
-          padding: 14px;
-          background: var(--cyan-gradient);
-          color: white;
-          font-weight: bold;
-          border-radius: var(--radius-md);
-          border: none;
-          cursor: pointer;
-          transition: transform 0.1s, opacity 0.2s;
-        }
-        .admin-button:hover:not(:disabled) {
-          transform: translateY(-1px);
-          filter: brightness(1.1);
-        }
-        .admin-button:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
-        }
-        .status-box {
-          margin-top: 24px;
-          padding: 16px;
-          border-radius: var(--radius-md);
-          font-size: 14px;
-        }
-        .status-box.success {
-          background: var(--cyan-dim);
-          border: 1px solid var(--cyan-border);
-          color: var(--cyan-light);
-        }
-        .status-box.error {
-          background: rgba(239, 68, 68, 0.1);
-          border: 1px solid rgba(239, 68, 68, 0.3);
-          color: #f87171;
-        }
-        .logout-btn {
-          margin-top: 32px;
-          background: transparent;
-          color: var(--text-secondary);
-          font-size: 13px;
-          text-decoration: underline;
-          cursor: pointer;
-          border: none;
-        }
-        .logout-btn:hover {
-          color: white;
-        }
-      `}</style>
     </div>
   )
+}
+
+const styles = {
+  adminPage: {
+    height: '100vh',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    background: 'var(--bg-primary)',
+    padding: '20px',
+  },
+  adminContainer: {
+    width: '100%',
+    maxWidth: '400px',
+    background: 'var(--bg-secondary)',
+    padding: '32px',
+    borderRadius: 'var(--radius-lg)',
+    border: '1px solid var(--border-subtle)',
+    textAlign: 'center',
+    boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
+  },
+  adminTitle: {
+    fontSize: '24px',
+    marginBottom: '8px',
+    color: 'var(--cyan-light)',
+    textTransform: 'uppercase',
+    letterSpacing: '1px',
+  },
+  adminUser: {
+    color: 'var(--text-secondary)',
+    fontSize: '14px',
+    marginBottom: '32px',
+  },
+  syncBox: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '16px',
+  },
+  adminButton: {
+    padding: '14px',
+    background: 'var(--cyan-gradient)',
+    color: 'white',
+    fontWeight: 'bold',
+    borderRadius: 'var(--radius-md)',
+    border: 'none',
+    cursor: 'pointer',
+    transition: 'transform 0.1s, opacity 0.2s',
+  },
+  statusBox: {
+    marginTop: '24px',
+    padding: '16px',
+    borderRadius: 'var(--radius-md)',
+    fontSize: '14px',
+  },
+  statusSuccess: {
+    background: 'var(--cyan-dim)',
+    border: '1px solid var(--cyan-border)',
+    color: 'var(--cyan-light)',
+  },
+  statusError: {
+    background: 'rgba(239, 68, 68, 0.1)',
+    border: '1px solid rgba(239, 68, 68, 0.3)',
+    color: '#f87171',
+  },
+  logoutBtn: {
+    marginTop: '32px',
+    background: 'transparent',
+    color: 'var(--text-secondary)',
+    fontSize: '13px',
+    textDecoration: 'underline',
+    cursor: 'pointer',
+    border: 'none',
+  },
 }

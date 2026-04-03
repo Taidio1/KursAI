@@ -1,9 +1,11 @@
-export async function syncNotionContent(adminSecret) {
+export async function syncNotionContent() {
+  const secret = import.meta.env.VITE_ADMIN_SECRET || 'dev_secret'
+  
   const response = await fetch('http://localhost:8000/sync/notion', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'x-admin-secret': adminSecret,
+      'x-admin-secret': secret,
     },
   })
 

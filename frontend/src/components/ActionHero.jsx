@@ -1,4 +1,7 @@
+import { useNavigate } from 'react-router-dom'
+
 export default function ActionHero({ lastLesson, streak = 7 }) {
+  const navigate = useNavigate()
   return (
     <div style={{
       background: 'linear-gradient(135deg, rgba(6, 182, 212, 0.15) 0%, rgba(13, 13, 42, 0) 100%)',
@@ -24,7 +27,7 @@ export default function ActionHero({ lastLesson, streak = 7 }) {
         </p>
         
         <button 
-          onClick={() => (window.location.href = '/course/wspolna')} // Currently only 'wspolna' exists
+          onClick={() => navigate('/kurs/wspolna')} // Currently only 'wspolna' exists
           style={{
             background: 'var(--cyan-gradient)', color: 'white', padding: '14px 36px',
             borderRadius: '12px', fontWeight: '700', fontSize: '16px', border: 'none',

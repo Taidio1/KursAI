@@ -1,10 +1,13 @@
+import { useNavigate } from 'react-router-dom'
+
 export default function PathCard({ path }) {
+  const navigate = useNavigate()
   const isStarted = path.progress > 0
   const isComplete = path.progress === 100
 
   return (
     <div 
-      onClick={() => path.slug && (window.location.href = `/course/${path.slug}`)}
+      onClick={() => path.slug && navigate(`/kurs/${path.slug}`)}
       style={{
         background: 'var(--bg-secondary)', 
         border: `1px solid ${isStarted ? (isComplete ? 'var(--border-subtle)' : 'var(--cyan-border)') : 'var(--border-subtle)'}`,
