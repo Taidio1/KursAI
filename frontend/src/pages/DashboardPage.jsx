@@ -3,26 +3,13 @@ import { useDashboardData } from '../hooks/useDashboardData'
 import Navbar from '../components/Navbar'
 import ActionHero from '../components/ActionHero'
 import PathCard from '../components/PathCard'
+import DashboardSkeleton from '../components/DashboardSkeleton'
 
 export default function DashboardPage() {
   const { user } = useAuth()
   const { paths, lastLesson, streak, loading, error } = useDashboardData()
   
-  if (loading) {
-    return (
-      <div style={{ 
-        height: '100vh', 
-        background: 'var(--bg-primary)', 
-        color: 'var(--text-primary)', 
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'center',
-        fontSize: '18px'
-      }}>
-        Ładowanie Twoich postępów...
-      </div>
-    )
-  }
+  if (loading) return <DashboardSkeleton />
 
   if (error) {
     return (

@@ -22,6 +22,21 @@ const queryClient = new QueryClient({
   },
 })
 
+it('shows skeleton instead of loading text while fetching data', () => {
+  global.fetch = vi.fn(() => new Promise(() => {})) // nigdy nie resolve'uje
+  render(
+    <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+      <AuthContext.Provider value={{ user: { id: 'abc', user_metadata: { name: 'Jan' } }, loading: false }}>
+        <MemoryRouter>
+          <DashboardPage />
+        </MemoryRouter>
+      </AuthContext.Provider>
+    </QueryClientProvider>
+  )
+  expect(screen.queryByText(/Ładowanie Twoich postępów/)).not.toBeInTheDocument()
+  expect(document.querySelector('[data-testid="skeleton-card"]')).toBeInTheDocument()
+})
+
 function renderDashboard(user = { id: 'abc', user_metadata: { name: 'Jan' } }) {
   // Mock fetch for useDashboardData
   global.fetch = vi.fn().mockResolvedValue({
