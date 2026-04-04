@@ -42,18 +42,15 @@ export function AuthProvider({ children }) {
         if (mounted) setLoading(false)
 
         if (u) {
-          const cachedRole = localStorage.getItem(ROLE_CACHE_KEY)
-          if (event === 'SIGNED_IN' || !cachedRole) {
-            try {
-              const r = await fetchRole(u.id)
-              if (mounted) {
-                localStorage.setItem(ROLE_CACHE_KEY, r)
-                setRole(r)
-              }
-            } catch {
-              if (mounted && !localStorage.getItem(ROLE_CACHE_KEY)) {
-                setRole('user')
-              }
+          try {
+            const r = await fetchRole(u.id)
+            if (mounted) {
+              localStorage.setItem(ROLE_CACHE_KEY, r)
+              setRole(r)
+            }
+          } catch {
+            if (mounted && !localStorage.getItem(ROLE_CACHE_KEY)) {
+              setRole('user')
             }
           }
         }

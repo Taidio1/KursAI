@@ -88,9 +88,16 @@ it('initializes role from localStorage without waiting for fetchRole', async () 
   localStorage.setItem('kursai-role', 'admin')
   const { supabase } = await import('../../lib/supabase')
 
+  // fetchRole nigdy nie resolve'uje — sprawdzamy rolę z cache zanim serwer odpowie
+  supabase.from.mockReturnValue({
+    select: vi.fn().mockReturnThis(),
+    eq: vi.fn().mockReturnThis(),
+    single: vi.fn().mockReturnValue(new Promise(() => {})),
+    upsert: vi.fn().mockResolvedValue({}),
+  })
+
   let resolveAuthChange
   supabase.auth.onAuthStateChange.mockImplementation((cb) => {
-    // opóźniamy wywołanie callbacka
     resolveAuthChange = () => cb('INITIAL_SESSION', { user: { id: 'user-123' } })
     return { data: { subscription: { unsubscribe: vi.fn() } } }
   })
@@ -100,14 +107,14 @@ it('initializes role from localStorage without waiting for fetchRole', async () 
   // Przed wywołaniem callbacka — loading=true
   expect(screen.getByText('Loading...')).toBeInTheDocument()
 
-  // Wywołujemy callback — loading=false, rola z cache
+  // Wywołujemy callback — loading=false natychmiast, rola z cache
   resolveAuthChange()
 
   await waitFor(() => {
     expect(screen.queryByText('Loading...')).not.toBeInTheDocument()
   })
 
-  // Rola z localStorage dostępna od razu
+  // fetchRole wciąż pending — rola pochodzi z localStorage
   expect(screen.getByText('user:user-123 role:admin')).toBeInTheDocument()
 })
 
