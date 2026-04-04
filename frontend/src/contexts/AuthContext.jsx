@@ -4,6 +4,8 @@ import { useSessionSync } from '../hooks/useSessionSync'
 
 export const AuthContext = createContext(null)
 
+const ROLE_CACHE_KEY = 'kursai-role'
+
 async function fetchRole(userId) {
   const { data } = await supabase
     .from('profiles')
@@ -15,36 +17,51 @@ async function fetchRole(userId) {
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
-  const [role, setRole] = useState(null)
+  const [role, setRole] = useState(() => localStorage.getItem(ROLE_CACHE_KEY))
   const [loading, setLoading] = useState(true)
 
   useSessionSync(user)
 
   useEffect(() => {
     let mounted = true
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       const u = session?.user ?? null
       if (mounted) setUser(u)
-      
-      try {
-        const r = u ? await fetchRole(u.id) : null
-        if (mounted) setRole(r)
-      } catch {
-        if (mounted) setRole('user')
-      } finally {
-        if (mounted && (event === 'INITIAL_SESSION' || event === 'SIGNED_IN' || event === 'SIGNED_OUT')) {
-           setLoading(false)
+
+      if (event === 'SIGNED_OUT') {
+        localStorage.removeItem(ROLE_CACHE_KEY)
+        if (mounted) {
+          setRole(null)
+          setLoading(false)
+        }
+        return
+      }
+
+      if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN') {
+        if (mounted) setLoading(false)
+
+        if (u) {
+          const cachedRole = localStorage.getItem(ROLE_CACHE_KEY)
+          if (event === 'SIGNED_IN' || !cachedRole) {
+            try {
+              const r = await fetchRole(u.id)
+              if (mounted) {
+                localStorage.setItem(ROLE_CACHE_KEY, r)
+                setRole(r)
+              }
+            } catch {
+              if (mounted && !localStorage.getItem(ROLE_CACHE_KEY)) {
+                setRole('user')
+              }
+            }
+          }
         }
       }
     })
 
-    const fallbackTimeout = setTimeout(() => {
-      if (mounted && loading) setLoading(false)
-    }, 1500)
-
     return () => {
       mounted = false
-      clearTimeout(fallbackTimeout)
       subscription.unsubscribe()
     }
   }, [])

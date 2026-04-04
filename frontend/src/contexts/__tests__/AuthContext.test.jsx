@@ -31,46 +31,100 @@ vi.mock('../../lib/supabase', () => {
   }
 })
 
+beforeEach(() => {
+  localStorage.clear()
+  vi.clearAllMocks()
+})
+
 function TestConsumer() {
-  const { user, loading } = useAuth()
+  const { user, role, loading } = useAuth()
   if (loading) return <div>Loading...</div>
-  return <div>{user ? `user:${user.id}` : 'no-user'}</div>
+  return <div>{user ? `user:${user.id}` : 'no-user'} role:{role ?? 'null'}</div>
 }
 
-it('provides null user when no session', async () => {
-  render(
+function renderWithProviders() {
+  return render(
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <TestConsumer />
       </AuthProvider>
     </QueryClientProvider>
   )
-  // Increase timeout because of fallbackTimeout in AuthProvider
+}
+
+it('resolves loading quickly when no session (INITIAL_SESSION with null)', async () => {
+  const { supabase } = await import('../../lib/supabase')
+  supabase.auth.onAuthStateChange.mockImplementation((cb) => {
+    cb('INITIAL_SESSION', null)
+    return { data: { subscription: { unsubscribe: vi.fn() } } }
+  })
+
+  renderWithProviders()
+
   await waitFor(() => {
     expect(screen.queryByText('Loading...')).not.toBeInTheDocument()
-  }, { timeout: 3000 })
-  
-  expect(screen.getByText('no-user')).toBeInTheDocument()
+  }) // domyślny timeout 1000ms — fallback timeout już nie blokuje
+
+  expect(screen.getByText('no-user role:null')).toBeInTheDocument()
 })
 
-it('provides user from session', async () => {
+it('provides user from session and fetches role', async () => {
   const { supabase } = await import('../../lib/supabase')
-  
-  // To satisfy onAuthStateChange which is called in useEffect
   supabase.auth.onAuthStateChange.mockImplementation((cb) => {
     cb('INITIAL_SESSION', { user: { id: 'user-123' } })
     return { data: { subscription: { unsubscribe: vi.fn() } } }
   })
 
-  render(
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <TestConsumer />
-      </AuthProvider>
-    </QueryClientProvider>
-  )
-  
+  renderWithProviders()
+
   await waitFor(() => {
-    expect(screen.getByText('user:user-123')).toBeInTheDocument()
+    expect(screen.getByText('user:user-123 role:user')).toBeInTheDocument()
   })
+
+  expect(localStorage.getItem('kursai-role')).toBe('user')
+})
+
+it('initializes role from localStorage without waiting for fetchRole', async () => {
+  localStorage.setItem('kursai-role', 'admin')
+  const { supabase } = await import('../../lib/supabase')
+
+  let resolveAuthChange
+  supabase.auth.onAuthStateChange.mockImplementation((cb) => {
+    // opóźniamy wywołanie callbacka
+    resolveAuthChange = () => cb('INITIAL_SESSION', { user: { id: 'user-123' } })
+    return { data: { subscription: { unsubscribe: vi.fn() } } }
+  })
+
+  renderWithProviders()
+
+  // Przed wywołaniem callbacka — loading=true
+  expect(screen.getByText('Loading...')).toBeInTheDocument()
+
+  // Wywołujemy callback — loading=false, rola z cache
+  resolveAuthChange()
+
+  await waitFor(() => {
+    expect(screen.queryByText('Loading...')).not.toBeInTheDocument()
+  })
+
+  // Rola z localStorage dostępna od razu
+  expect(screen.getByText('user:user-123 role:admin')).toBeInTheDocument()
+})
+
+it('clears role from localStorage on SIGNED_OUT', async () => {
+  localStorage.setItem('kursai-role', 'user')
+  const { supabase } = await import('../../lib/supabase')
+  supabase.auth.onAuthStateChange.mockImplementation((cb) => {
+    cb('SIGNED_OUT', null)
+    return { data: { subscription: { unsubscribe: vi.fn() } } }
+  })
+
+  renderWithProviders()
+
+  await waitFor(() => {
+    expect(screen.queryByText('Loading...')).not.toBeInTheDocument()
+  })
+
+  expect(localStorage.getItem('kursai-role')).toBeNull()
+  expect(screen.getByText('no-user role:null')).toBeInTheDocument()
 })
