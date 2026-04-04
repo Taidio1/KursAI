@@ -1,10 +1,8 @@
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 
-export default function ProtectedRoute({ children, requiredRole }) {
-  const { user, role, loading } = useAuth()
-
-  if (loading) return (
+function Spinner() {
+  return (
     <div style={{
       position: 'fixed',
       inset: 0,
@@ -25,7 +23,14 @@ export default function ProtectedRoute({ children, requiredRole }) {
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   )
+}
+
+export default function ProtectedRoute({ children, requiredRole }) {
+  const { user, role, loading } = useAuth()
+
+  if (loading) return <Spinner />
   if (!user) return <Navigate to="/login" replace />
+  if (requiredRole && role === null) return <Spinner />
   if (requiredRole && role !== requiredRole) return <Navigate to="/dashboard" replace />
   return children
 }
