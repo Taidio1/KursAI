@@ -11,13 +11,20 @@ export default defineConfig({
   server: {
     host: '0.0.0.0',
     port: 3000,
+    proxy: {
+      '/api': {
+        target: 'http://fastapi:8000',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
+      },
+    },
     headers: {
       'Content-Security-Policy': [
         "default-src 'self'",
         "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
         "font-src 'self' https://fonts.gstatic.com",
-        "connect-src 'self' http://localhost:8000 https://*.supabase.co wss://*.supabase.co ws://localhost:*",
+        "connect-src 'self' https://*.supabase.co wss://*.supabase.co ws://localhost:*",
         "img-src 'self' data: blob:",
         "worker-src blob:",
       ].join('; '),

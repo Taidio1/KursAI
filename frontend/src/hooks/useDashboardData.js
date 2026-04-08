@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '../contexts/AuthContext'
 
-const BACKEND_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+const BACKEND_URL = '/api'
 
 export function useDashboardData() {
   const { user, session } = useAuth()
