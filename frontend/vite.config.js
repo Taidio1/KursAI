@@ -11,6 +11,7 @@ export default defineConfig({
   server: {
     host: '0.0.0.0',
     port: 3000,
+    allowedHosts: ['kapi.tojest.dev'],
     proxy: {
       '/api': {
         target: 'http://fastapi:8000',
