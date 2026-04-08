@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { materialsService } from '../services/materialsService';
 import MaterialCard from '../components/MaterialCard';
+import MaterialDetailsCard from '../components/MaterialDetailsCard';
 import MaterialSidebar from '../components/MaterialSidebar';
 import MaterialsHeader from '../components/MaterialsHeader';
 import Navbar from '../components/Navbar';
@@ -19,6 +20,7 @@ export default function MaterialsPage() {
   });
   const [gridCols, setGridCols] = useState(3);
   const [selectedMaterialId, setSelectedMaterialId] = useState(null);
+  const [fetchError, setFetchError] = useState(null);
 
   useEffect(() => {
     materialsService.getMaterials()
@@ -28,6 +30,7 @@ export default function MaterialsPage() {
       })
       .catch(err => {
         console.error(err);
+        setFetchError('Nie udało się załadować materiałów. Sprawdź połączenie i spróbuj ponownie.');
         setLoading(false);
       });
   }, []);
@@ -124,6 +127,17 @@ export default function MaterialsPage() {
                     <div key={n} className="h-48 glass rounded-xl animate-pulse"></div>
                   ))}
                 </div>
+              ) : fetchError ? (
+                <div className="glass rounded-xl p-12 text-center flex flex-col items-center justify-center">
+                  <h3 className="text-xl font-bold text-red-500 mb-2">Błąd ładowania</h3>
+                  <p className="text-muted-foreground text-sm mb-6 max-w-xs">{fetchError}</p>
+                  <button
+                    onClick={() => window.location.reload()}
+                    className="px-6 py-2.5 bg-primary/10 text-primary text-sm font-semibold rounded-xl border border-primary/20 hover:bg-primary/20 transition-all"
+                  >
+                    Spróbuj ponownie
+                  </button>
+                </div>
               ) : filteredMaterials.length > 0 ? (
                 <div className={`grid ${gridClass} gap-4`}>
                   {filteredMaterials.map(m => (
@@ -157,6 +171,15 @@ export default function MaterialsPage() {
           </div>
         </main>
       </div>
+
+      {/* Modal - Rendered at the end of root to stay on top */}
+      {selectedMaterial && (
+        <MaterialDetailsCard 
+          material={selectedMaterial} 
+          onClose={() => handleMaterialSelect(null)}
+          onTagClick={handleTagClick}
+        />
+      )}
     </div>
   );
 }

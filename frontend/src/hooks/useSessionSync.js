@@ -19,6 +19,7 @@ async function registerSession(userId) {
 
 export function useSessionSync(user) {
   const realtimeChannelRef = useRef(null)
+  const wasAuthenticatedRef = useRef(false)
 
   const unsubscribe = () => {
     if (realtimeChannelRef.current) {
@@ -34,7 +35,7 @@ export function useSessionSync(user) {
       .on(
         'postgres_changes',
         {
-          event: '*',
+          event: 'INSERT',
           schema: 'public',
           table: 'active_sessions',
           filter: `user_id=eq.${userId}`,
@@ -42,7 +43,23 @@ export function useSessionSync(user) {
         (payload) => {
           const remoteKey = payload.new?.session_key
           const localKey = sessionStorage.getItem(SESSION_KEY_STORAGE)
-          if (!remoteKey || remoteKey !== localKey) {
+          if (remoteKey && remoteKey !== localKey) {
+            supabase.auth.signOut()
+          }
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'active_sessions',
+          filter: `user_id=eq.${userId}`,
+        },
+        (payload) => {
+          const remoteKey = payload.new?.session_key
+          const localKey = sessionStorage.getItem(SESSION_KEY_STORAGE)
+          if (remoteKey && remoteKey !== localKey) {
             supabase.auth.signOut()
           }
         }
@@ -53,8 +70,10 @@ export function useSessionSync(user) {
 
   useEffect(() => {
     if (user) {
+      wasAuthenticatedRef.current = true
       registerSession(user.id).then(() => subscribe(user.id))
-    } else {
+    } else if (wasAuthenticatedRef.current) {
+      // Only clear session key on actual signout, not during initial mount
       sessionStorage.removeItem(SESSION_KEY_STORAGE)
       unsubscribe()
     }

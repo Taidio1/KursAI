@@ -1,531 +1,222 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
-
-const lessons = [
-  {
-    id: '11111111-0000-0000-0000-000000000001',
-    title: 'Wstęp – Gdzie jesteśmy z AI?',
-    duration: '5 min',
-    completed: false,
-    content: {
-      type: 'intro',
-      sections: [
-        {
-          kind: 'hero',
-          text: 'Pewnie zastanawiasz się, w jakiej erze Sztucznej Inteligencji obecnie jesteśmy?',
-        },
-        {
-          kind: 'timeline',
-          items: [
-            {
-              era: '2022',
-              label: 'Fiat 126p',
-              desc: 'Pierwsze ChatGPT i OpenAI – skromny początek, rewolucyjna iskra.',
-              color: 'var(--text-muted)',
-            },
-            {
-              era: '2024',
-              label: 'BMW E60',
-              desc: 'AI przeszło kilka ewolucji, poszerzyła się konkurencja. Modele stały się potężne i dostępne.',
-              color: 'var(--cyan)',
-            },
-            {
-              era: '2026',
-              label: 'Bugatti 400 km/h',
-              desc: 'Samo Anthropic wydało ponad 60 nowych aktualizacji w ciągu 3 miesięcy. Roboty, asystenci offline, analiza wideo, deepfake – AI jest wszędzie.',
-              color: 'var(--amber)',
-            },
-          ],
-        },
-      ],
-    },
-  },
-  {
-    id: '11111111-0000-0000-0000-000000000002',
-    title: 'Sztuka i inżynieria Promptowania',
-    duration: '15 min',
-    completed: false,
-    content: {
-      type: 'lesson',
-      intro: 'W 2026 roku promptowanie to inżynieria kontekstu, a nie "zaklinanie AI". Modele klasy Frontier (Claude 3.5+, Gemini 2.0+) wymagają precyzyjnej struktury, aby dostarczać przewidywalne wyniki.',
-      sections: [
-        {
-          kind: 'framework',
-          title: 'Framework C-O-R-E',
-          subtitle: 'Każdy profesjonalny prompt powinien przejść przez tę walidację:',
-          items: [
-            {
-              letter: 'C',
-              name: 'Context',
-              desc: 'Co model musi wiedzieć o otoczeniu zadania?',
-              bad: 'Napisz post na LinkedIn o AI.',
-              good: 'Jesteś ekspertem od automatyzacji. Piszesz do właścicieli małych firm (SMB), którzy boją się technologii. Celem jest pokazanie, że AI oszczędza 2h dziennie.',
-              color: 'var(--cyan)',
-            },
-            {
-              letter: 'O',
-              name: 'Objective',
-              desc: 'Jasny, mierzalny wynik. Definiuj czasownikami operacyjnymi.',
-              good: 'Wygeneruj listę 5 konkretnych narzędzi no-code z linkami.',
-              color: '#a78bfa',
-            },
-            {
-              letter: 'R',
-              name: 'Rules',
-              desc: '"Guardrails" – czego modelowi nie wolno robić.',
-              good: 'Nie używaj przymiotników "rewolucyjny", "niesamowity". Odpowiedź musi mieścić się w 150 słowach.',
-              color: 'var(--amber)',
-            },
-            {
-              letter: 'E',
-              name: 'Examples',
-              desc: 'Pokaż, nie tylko opisuj. 2-3 przykłady Input/Output drastycznie zmniejszają ryzyko halucynacji.',
-              color: '#34d399',
-            },
-          ],
-        },
-        {
-          kind: 'tip',
-          title: 'Chain-of-Thought (CoT)',
-          desc: 'Zmuszanie modelu do "myślenia na głos" przed podaniem wyniku. To bezpiecznik logiczny.',
-          code: 'Przeanalizuj krok po kroku proces logiczny wewnątrz tagów <thinking> przed wygenerowaniem finalnej odpowiedzi.',
-        },
-        {
-          kind: 'paths',
-          title: 'Zastosowanie według ścieżki',
-          noCode: {
-            title: 'No-Code: Agenci Autonomiczni',
-            items: [
-              'Przenieś C-O-R-E do System Instructions GPTs lub Claude Projects',
-              'Używaj zmiennych {{dane}} dla automatyzacji w n8n/Make',
-            ],
-          },
-          code: {
-            title: 'Kod: LLM jako Silnik Aplikacji',
-            items: [
-              'JSON Schema Enforcement – używaj response_format w API',
-              'XML Tagging – tagi <context>, <instruction>, <data_to_process>',
-              'Delimiter Engineering – separatory ### lub --- przeciw Prompt Injection',
-            ],
-          },
-        },
-      ],
-    },
-  },
-  {
-    id: '11111111-0000-0000-0000-000000000003',
-    title: 'Twój nowy zespół – modele webowe',
-    duration: '12 min',
-    completed: false,
-    content: {
-      type: 'lesson',
-      intro: 'W 2026 roku nie szukasz "jednego modelu do wszystkiego". Budujesz zespół specjalistów, w którym każdy ma unikalne supermoce.',
-      sections: [
-        {
-          kind: 'team',
-          title: 'Matrix Wyboru – Kto jest kim?',
-          members: [
-            {
-              name: 'Claude 3.5/4',
-              role: 'Architekt & Logik',
-              power: 'Najlepsza logika, brak lania wody, precyzyjne struktury. Coworking przez Artifacts.',
-              useCases: ['Strategia i planowanie', 'Refaktoryzacja kodu', 'Precyzyjne analizy'],
-              color: '#f97316',
-              icon: 'C',
-            },
-            {
-              name: 'Gemini 2.0 Pro',
-              role: 'Multimodalny Gigant',
-              power: 'Gigantyczne okno kontekstowe. Natywna analiza wideo (Veo) i muzyki (Lyria 3).',
-              useCases: ['Analiza 2h wideo jednym promptem', 'Debugging w chmurze', 'Google Workspace'],
-              color: '#4285f4',
-              icon: 'G',
-            },
-            {
-              name: 'NotebookLM',
-              role: 'Twoja Cyfrowa Biblioteka',
-              power: 'Brak halucynacji dzięki Source Grounding. Tworzy podcasty z Twoich notatek.',
-              useCases: ['Praca na własnej wiedzy', 'Generowanie podcastów', 'Infografiki z .md'],
-              color: '#0f9d58',
-              icon: 'N',
-            },
-            {
-              name: 'Grok',
-              role: 'Scout & Copywriter',
-              power: 'Dostęp do danych Real-time z X (Twitter). Najbardziej humanizowany język.',
-              useCases: ['Trendy w czasie rzeczywistym', 'Copywriting', 'Social media'],
-              color: '#1d9bf0',
-              icon: 'X',
-            },
-          ],
-        },
-        {
-          kind: 'workflow',
-          title: 'Workflow Synergii (No-Code)',
-          flows: [
-            {
-              title: 'Analiza i Strategia',
-              steps: ['10 PDFów → NotebookLM', 'Stwórz podsumowanie', 'Wklej do Claude', 'Finalna strategia'],
-            },
-            {
-              title: 'Social Media Pipeline',
-              steps: ['Sprawdź trendy na Grok', 'Analiza wizualna w Gemini', 'Generuj grafiki w Canva AI'],
-            },
-          ],
-        },
-      ],
-    },
-  },
-]
-
-function LessonIntro({ content }) {
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-      {content.sections.map((section, i) => {
-        if (section.kind === 'hero') {
-          return (
-            <div key={i} style={{
-              background: 'var(--bg-surface)',
-              border: '1px solid var(--border-subtle)',
-              borderRadius: '16px',
-              padding: '32px',
-              textAlign: 'center',
-            }}>
-              <p style={{ color: 'var(--text-primary)', fontSize: '20px', lineHeight: '1.7', fontWeight: '500' }}>
-                {section.text}
-              </p>
-            </div>
-          )
-        }
-        if (section.kind === 'timeline') {
-          return (
-            <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <h3 style={{ color: 'var(--text-secondary)', fontSize: '13px', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '4px' }}>
-                Ewolucja AI
-              </h3>
-              {section.items.map((item, j) => (
-                <div key={j} style={{
-                  display: 'flex',
-                  gap: '20px',
-                  background: 'var(--bg-surface)',
-                  border: `1px solid ${item.color}33`,
-                  borderLeft: `3px solid ${item.color}`,
-                  borderRadius: '12px',
-                  padding: '20px 24px',
-                  alignItems: 'flex-start',
-                }}>
-                  <div style={{ flexShrink: 0, textAlign: 'center' }}>
-                    <div style={{ color: item.color, fontWeight: '800', fontSize: '18px' }}>{item.era}</div>
-                    <div style={{ color: 'var(--text-muted)', fontSize: '11px', marginTop: '2px' }}>rok</div>
-                  </div>
-                  <div>
-                    <div style={{ color: item.color, fontWeight: '700', fontSize: '15px', marginBottom: '6px' }}>
-                      {item.label}
-                    </div>
-                    <div style={{ color: 'var(--text-secondary)', fontSize: '14px', lineHeight: '1.6' }}>
-                      {item.desc}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )
-        }
-        if (section.kind === 'callout') {
-          return (
-            <div key={i} style={{
-              background: 'var(--cyan-dim)',
-              border: '1px solid var(--cyan-border)',
-              borderRadius: '12px',
-              padding: '20px 24px',
-              display: 'flex',
-              gap: '12px',
-              alignItems: 'center',
-            }}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--cyan-light)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
-                <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
-              </svg>
-              <p style={{ color: 'var(--cyan-light)', fontSize: '15px', fontWeight: '500' }}>{section.text}</p>
-            </div>
-          )
-        }
-        return null
-      })}
-    </div>
-  )
-}
-
-function LessonContent({ content }) {
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '36px' }}>
-      <div style={{
-        background: 'var(--bg-surface)',
-        border: '1px solid var(--border-subtle)',
-        borderRadius: '12px',
-        padding: '24px',
-      }}>
-        <p style={{ color: 'var(--text-secondary)', fontSize: '15px', lineHeight: '1.8' }}>{content.intro}</p>
-      </div>
-
-      {content.sections.map((section, i) => {
-        if (section.kind === 'framework') {
-          return (
-            <div key={i}>
-              <h2 style={{ color: 'var(--text-primary)', fontSize: '20px', fontWeight: '700', marginBottom: '8px' }}>
-                {section.title}
-              </h2>
-              <p style={{ color: 'var(--text-muted)', fontSize: '13px', marginBottom: '20px' }}>{section.subtitle}</p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                {section.items.map((item, j) => (
-                  <div key={j} style={{
-                    background: 'var(--bg-surface)',
-                    border: `1px solid ${item.color}33`,
-                    borderRadius: '12px',
-                    padding: '20px',
-                  }}>
-                    <div style={{ display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
-                      <div style={{
-                        width: '36px',
-                        height: '36px',
-                        borderRadius: '8px',
-                        background: `${item.color}22`,
-                        border: `1px solid ${item.color}55`,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        color: item.color,
-                        fontWeight: '800',
-                        fontSize: '18px',
-                        flexShrink: 0,
-                      }}>
-                        {item.letter}
-                      </div>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ display: 'flex', gap: '8px', alignItems: 'baseline', marginBottom: '6px' }}>
-                          <span style={{ color: item.color, fontWeight: '700', fontSize: '15px' }}>{item.name}</span>
-                          <span style={{ color: 'var(--text-muted)', fontSize: '13px' }}>({item.letter})</span>
-                        </div>
-                        <p style={{ color: 'var(--text-secondary)', fontSize: '13px', lineHeight: '1.6', marginBottom: item.bad || item.good ? '12px' : '0' }}>
-                          {item.desc}
-                        </p>
-                        {item.bad && (
-                          <div style={{ marginBottom: '8px' }}>
-                            <span style={{ color: '#ef4444', fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Źle: </span>
-                            <span style={{ color: 'var(--text-muted)', fontSize: '13px', fontStyle: 'italic' }}>{item.bad}</span>
-                          </div>
-                        )}
-                        {item.good && (
-                          <div>
-                            <span style={{ color: '#34d399', fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Dobrze: </span>
-                            <span style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>{item.good}</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )
-        }
-
-        if (section.kind === 'tip') {
-          return (
-            <div key={i} style={{
-              background: 'var(--amber-dim)',
-              border: '1px solid var(--amber-border)',
-              borderRadius: '12px',
-              padding: '20px 24px',
-            }}>
-              <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '10px' }}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
-                </svg>
-                <span style={{ color: 'var(--amber)', fontWeight: '700', fontSize: '14px' }}>{section.title}</span>
-              </div>
-              <p style={{ color: 'var(--text-secondary)', fontSize: '13px', lineHeight: '1.6', marginBottom: '12px' }}>{section.desc}</p>
-              <div style={{
-                background: 'rgba(0,0,0,0.3)',
-                borderRadius: '8px',
-                padding: '12px 16px',
-                fontFamily: 'monospace',
-                fontSize: '13px',
-                color: 'var(--amber-light)',
-                lineHeight: '1.6',
-              }}>
-                {section.code}
-              </div>
-            </div>
-          )
-        }
-
-        if (section.kind === 'paths') {
-          return (
-            <div key={i}>
-              <h3 style={{ color: 'var(--text-primary)', fontSize: '16px', fontWeight: '700', marginBottom: '16px' }}>{section.title}</h3>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                <div style={{
-                  background: 'var(--amber-dim)',
-                  border: '1px solid var(--amber-border)',
-                  borderRadius: '12px',
-                  padding: '18px',
-                }}>
-                  <div style={{ color: 'var(--amber)', fontWeight: '700', fontSize: '13px', marginBottom: '12px' }}>
-                    🛠 {section.noCode.title}
-                  </div>
-                  {section.noCode.items.map((item, k) => (
-                    <div key={k} style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
-                      <span style={{ color: 'var(--amber)', flexShrink: 0, marginTop: '2px' }}>›</span>
-                      <span style={{ color: 'var(--text-secondary)', fontSize: '13px', lineHeight: '1.5' }}>{item}</span>
-                    </div>
-                  ))}
-                </div>
-                <div style={{
-                  background: 'var(--cyan-dim)',
-                  border: '1px solid var(--cyan-border)',
-                  borderRadius: '12px',
-                  padding: '18px',
-                }}>
-                  <div style={{ color: 'var(--cyan-light)', fontWeight: '700', fontSize: '13px', marginBottom: '12px' }}>
-                    💻 {section.code.title}
-                  </div>
-                  {section.code.items.map((item, k) => (
-                    <div key={k} style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
-                      <span style={{ color: 'var(--cyan)', flexShrink: 0, marginTop: '2px' }}>›</span>
-                      <span style={{ color: 'var(--text-secondary)', fontSize: '13px', lineHeight: '1.5' }}>{item}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )
-        }
-
-        if (section.kind === 'team') {
-          return (
-            <div key={i}>
-              <h2 style={{ color: 'var(--text-primary)', fontSize: '20px', fontWeight: '700', marginBottom: '16px' }}>
-                {section.title}
-              </h2>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                {section.members.map((member, j) => (
-                  <div key={j} style={{
-                    background: 'var(--bg-surface)',
-                    border: `1px solid ${member.color}33`,
-                    borderRadius: '12px',
-                    padding: '20px',
-                  }}>
-                    <div style={{ display: 'flex', gap: '12px', alignItems: 'center', marginBottom: '12px' }}>
-                      <div style={{
-                        width: '38px',
-                        height: '38px',
-                        borderRadius: '10px',
-                        background: `${member.color}22`,
-                        border: `1px solid ${member.color}55`,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        color: member.color,
-                        fontWeight: '800',
-                        fontSize: '16px',
-                        flexShrink: 0,
-                      }}>
-                        {member.icon}
-                      </div>
-                      <div>
-                        <div style={{ color: member.color, fontWeight: '700', fontSize: '14px' }}>{member.name}</div>
-                        <div style={{ color: 'var(--text-muted)', fontSize: '12px' }}>{member.role}</div>
-                      </div>
-                    </div>
-                    <p style={{ color: 'var(--text-secondary)', fontSize: '13px', lineHeight: '1.6', marginBottom: '12px' }}>
-                      {member.power}
-                    </p>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                      {member.useCases.map((uc, k) => (
-                        <div key={k} style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-                          <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: member.color, flexShrink: 0 }} />
-                          <span style={{ color: 'var(--text-muted)', fontSize: '12px' }}>{uc}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )
-        }
-
-        if (section.kind === 'workflow') {
-          return (
-            <div key={i}>
-              <h3 style={{ color: 'var(--text-primary)', fontSize: '16px', fontWeight: '700', marginBottom: '16px' }}>{section.title}</h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                {section.flows.map((flow, j) => (
-                  <div key={j} style={{
-                    background: 'var(--bg-surface)',
-                    border: '1px solid var(--border-subtle)',
-                    borderRadius: '12px',
-                    padding: '18px',
-                  }}>
-                    <div style={{ color: 'var(--text-primary)', fontWeight: '600', fontSize: '13px', marginBottom: '12px' }}>{flow.title}</div>
-                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
-                      {flow.steps.map((step, k) => (
-                        <div key={k} style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                          <div style={{
-                            background: 'var(--cyan-dim)',
-                            border: '1px solid var(--cyan-border)',
-                            borderRadius: '8px',
-                            padding: '6px 12px',
-                            color: 'var(--cyan-light)',
-                            fontSize: '12px',
-                            fontWeight: '500',
-                          }}>
-                            {step}
-                          </div>
-                          {k < flow.steps.length - 1 && (
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                              <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
-                            </svg>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )
-        }
-
-        return null
-      })}
-    </div>
-  )
-}
+import { courseService } from '../services/courseService'
+import SceneProgressBar from '../components/SceneProgressBar'
+import SceneViewer from '../components/SceneViewer'
+import SceneControls from '../components/SceneControls'
+import { useSceneTimer } from '../hooks/useSceneTimer'
 
 export default function CoursePage() {
   const { user } = useAuth()
   const navigate = useNavigate()
-  const [activeLesson, setActiveLesson] = useState(0)
+  const { pathSlug } = useParams() // Expecting /kurs/:pathSlug
+  
+  const [path, setPath] = useState(null)
+  const [lessons, setLessons] = useState([])
+  const [activeLessonIdx, setActiveLessonIdx] = useState(0)
+  const [slides, setSlides] = useState([])
   const [completedLessons, setCompletedLessons] = useState(new Set())
+  const [loading, setLoading] = useState(true)
+  const [slidesLoading, setSlidesLoading] = useState(false)
+  
+  const [error, setError] = useState(null)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [sidebarPinned, setSidebarPinned] = useState(false)
+  const [activeSlideIdx, setActiveSlideIdx] = useState(0)
+  const [isPaused, setIsPaused] = useState(false)
 
-  const lesson = lessons[activeLesson]
-  const progress = Math.round((completedLessons.size / lessons.length) * 100)
+  const currentSlug = pathSlug || 'wspolna'
+
+  // 1. Fetch path and lessons list
+  useEffect(() => {
+    async function loadPathData() {
+      if (!user?.id) return;
+      
+      try {
+        setLoading(true)
+        console.log('Fetching path details for:', currentSlug)
+        const data = await courseService.getPathDetails(currentSlug)
+        console.log('Path details received:', data)
+        setPath(data)
+        
+        // Flatten lessons from courses
+        const allLessons = data.courses.flatMap(c => c.lessons)
+        setLessons(allLessons)
+        
+        // At this point we have the basic UI data, we can stop the top-level loading
+        setLoading(false)
+
+        // Fetch user progress separately
+        try {
+          console.log('Fetching user progress for:', user.id)
+          const { data: progress, error } = await supabase
+            .from('user_progress')
+            .select('lesson_id')
+            .eq('user_id', user.id)
+            .not('completed_at', 'is', null)
+            
+          if (error) throw error
+          if (progress) {
+            const completedSet = new Set(progress.map(p => p.lesson_id))
+            setCompletedLessons(completedSet)
+            const firstIncompleteIdx = allLessons.findIndex(l => !completedSet.has(l.id))
+            if (firstIncompleteIdx > 0) {
+              setActiveLessonIdx(firstIncompleteIdx)
+            }
+          }
+        } catch (progressErr) {
+          console.error('Error loading progress (continuing without it):', progressErr)
+        }
+        
+      } catch (err) {
+        console.error('Error loading path:', err)
+        setError(err.message || 'Nie udało się załadować ścieżki')
+        setLoading(false)
+      }
+    }
+    
+    loadPathData()
+  }, [currentSlug, user?.id])
+
+  // 2. Fetch slides when active lesson changes
+  useEffect(() => {
+    async function loadSlides() {
+      if (!lessons[activeLessonIdx]) return
+      
+      try {
+        setSlidesLoading(true)
+        setIsPaused(true)
+        const data = await courseService.getLessonSlides(lessons[activeLessonIdx].id)
+        setSlides(data.slides || [])
+      } catch (err) {
+        console.error('Error loading slides:', err)
+      } finally {
+        setSlidesLoading(false)
+        setIsPaused(false)
+      }
+    }
+    
+    loadSlides()
+  }, [activeLessonIdx, lessons])
+
+  // Reset sceny przy zmianie lekcji
+  useEffect(() => {
+    setActiveSlideIdx(0)
+    setIsPaused(false)
+  }, [activeLessonIdx])
+
+  useEffect(() => {
+    const handler = (e) => {
+      if (e.code === 'Space' && e.target === document.body) {
+        e.preventDefault()
+        setIsPaused(p => !p)
+      }
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [])
+
+  const progress = lessons.length > 0 
+    ? Math.round((completedLessons.size / lessons.length) * 100) 
+    : 0
+
+  const lesson = lessons[activeLessonIdx]
+
+  const currentSlide = slides[activeSlideIdx] || null
+
+  function handleAdvance() {
+    if (activeSlideIdx < slides.length - 1) {
+      setActiveSlideIdx(prev => prev + 1)
+    } else {
+      markComplete()
+    }
+  }
+
+  const { elapsedMs } = useSceneTimer({
+    slideKey: activeSlideIdx,
+    durationSeconds: currentSlide?.duration_seconds || 180,
+    isPaused,
+    onAdvance: handleAdvance,
+  })
 
   async function handleLogout() {
     await supabase.auth.signOut()
     navigate('/login')
   }
 
-  function markComplete() {
-    setCompletedLessons(prev => new Set([...prev, activeLesson]))
-    if (activeLesson < lessons.length - 1) {
-      setActiveLesson(activeLesson + 1)
+  async function markComplete() {
+    if (!lesson) return
+
+    const alreadyDone = completedLessons.has(lesson.id)
+
+    if (!alreadyDone) {
+      try {
+        const { error } = await supabase.from('user_progress').upsert({
+          user_id: user.id,
+          lesson_id: lesson.id,
+          mode: 'technical',
+          completed_at: new Date().toISOString()
+        }, { onConflict: 'user_id,lesson_id,mode' })
+
+        if (error) throw error
+        setCompletedLessons(prev => new Set([...prev, lesson.id]))
+      } catch (err) {
+        console.error('Error marking complete:', err)
+        return
+      }
     }
+
+    if (activeLessonIdx < lessons.length - 1) {
+      setActiveLessonIdx(activeLessonIdx + 1)
+    } else {
+      // Kurs ukończony – powrót do pierwszej lekcji (powtórka bez resetowania progresu)
+      setActiveLessonIdx(0)
+    }
+  }
+
+  function goToScene(idx) {
+    setActiveSlideIdx(idx)
+    setIsPaused(false)
+  }
+
+  function prevScene() {
+    if (activeSlideIdx > 0) goToScene(activeSlideIdx - 1)
+  }
+
+  function nextScene() {
+    if (activeSlideIdx < slides.length - 1) {
+      goToScene(activeSlideIdx + 1)
+    } else {
+      markComplete()
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-background text-primary">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+          <span className="font-bold tracking-widest text-xs uppercase opacity-50">Ładowanie ścieżki...</span>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="h-screen flex flex-col items-center justify-center gap-5 bg-background text-foreground">
+        <div className="text-xl font-extrabold text-red-500">Nie udało się załadować ścieżki</div>
+        <div className="text-sm opacity-80">{error}</div>
+        <button
+          onClick={() => window.location.reload()}
+          className="rounded-xl border border-border bg-secondary px-6 py-2.5 text-sm font-semibold hover:bg-secondary/80 transition-all"
+        >
+          Spróbuj ponownie
+        </button>
+      </div>
+    )
   }
 
   return (
@@ -541,7 +232,7 @@ export default function CoursePage() {
         flexShrink: 0,
         gap: '16px',
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: 0, flex: 1 }}>
           <button
             onClick={() => navigate('/dashboard')}
             style={{
@@ -564,13 +255,41 @@ export default function CoursePage() {
             Dashboard
           </button>
           <span style={{ color: 'var(--border-subtle)' }}>/</span>
-          <span style={{ color: 'var(--cyan-light)', fontWeight: '700', fontSize: '14px', whiteSpace: 'nowrap' }}>
-            Ścieżka Wspólna
+          <span style={{ color: 'var(--text-muted)', fontSize: '13px', whiteSpace: 'nowrap', flexShrink: 0 }}>
+            {path?.title || 'Ścieżka'}
           </span>
+          {lesson && (
+            <>
+              <span style={{ color: 'var(--border-subtle)', flexShrink: 0 }}>/</span>
+              <span style={{
+                color: 'var(--cyan-light)',
+                fontWeight: '700',
+                fontSize: '14px',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                minWidth: 0,
+              }}>
+                {lesson.title}
+              </span>
+              <span style={{
+                background: 'var(--cyan-dim)',
+                border: '1px solid var(--cyan-border)',
+                borderRadius: '999px',
+                padding: '2px 10px',
+                color: 'var(--cyan-light)',
+                fontSize: '11px',
+                fontWeight: '600',
+                letterSpacing: '0.5px',
+                flexShrink: 0,
+              }}>
+                {activeLessonIdx + 1} / {lessons.length}
+              </span>
+            </>
+          )}
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          {/* Progress bar */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <div style={{ width: '100px', height: '4px', background: 'var(--bg-surface-hover)', borderRadius: '999px', overflow: 'hidden' }}>
               <div style={{
@@ -616,7 +335,6 @@ export default function CoursePage() {
             transition: 'width 0.22s ease',
           }}
         >
-          {/* Sidebar header */}
           <div style={{
             padding: (sidebarPinned || sidebarOpen) ? '20px 16px 12px' : '20px 0 12px',
             borderBottom: '1px solid var(--border-subtle)',
@@ -645,13 +363,13 @@ export default function CoursePage() {
 
           <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', padding: '8px' }}>
             {lessons.map((l, idx) => {
-              const isActive = idx === activeLesson
-              const isDone = completedLessons.has(idx)
+              const isActive = idx === activeLessonIdx
+              const isDone = completedLessons.has(l.id)
               const expanded = sidebarPinned || sidebarOpen
               return (
                 <button
                   key={l.id}
-                  onClick={() => setActiveLesson(idx)}
+                  onClick={() => setActiveLessonIdx(idx)}
                   title={!expanded ? l.title : undefined}
                   style={{
                     width: '100%',
@@ -669,20 +387,7 @@ export default function CoursePage() {
                     transition: 'background 0.15s, border-color 0.15s, padding 0.22s ease',
                     overflow: 'hidden',
                   }}
-                  onMouseEnter={(e) => {
-                    if (!isActive) {
-                      e.currentTarget.style.background = 'var(--bg-surface)'
-                      e.currentTarget.style.borderColor = 'var(--border-subtle)'
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!isActive) {
-                      e.currentTarget.style.background = 'transparent'
-                      e.currentTarget.style.borderColor = 'transparent'
-                    }
-                  }}
                 >
-                  {/* Status indicator */}
                   <div style={{
                     width: '22px',
                     height: '22px',
@@ -709,7 +414,6 @@ export default function CoursePage() {
                     )}
                   </div>
 
-                  {/* Labels – hidden when collapsed */}
                   <div style={{
                     flex: 1,
                     minWidth: 0,
@@ -738,7 +442,7 @@ export default function CoursePage() {
           </div>
         </aside>
 
-        {/* Pin button – outside aside so hovering it doesn't trigger sidebar hover */}
+        {/* Pin button */}
         <button
           onClick={() => {
             setSidebarPinned(p => !p)
@@ -781,138 +485,46 @@ export default function CoursePage() {
 
         {/* Main Content */}
         <main style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-          {/* Lesson Header */}
-          <div style={{
-            padding: '24px 32px 20px',
-            borderBottom: '1px solid var(--border-subtle)',
-            flexShrink: 0,
-          }}>
-            <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '8px' }}>
-              <span style={{
-                background: 'var(--cyan-dim)',
-                border: '1px solid var(--cyan-border)',
-                borderRadius: '999px',
-                padding: '2px 10px',
-                color: 'var(--cyan-light)',
-                fontSize: '11px',
-                fontWeight: '600',
-                letterSpacing: '0.5px',
-              }}>
-                Lekcja {activeLesson + 1} z {lessons.length}
-              </span>
-              <span style={{
-                background: 'var(--bg-surface)',
-                border: '1px solid var(--border-subtle)',
-                borderRadius: '999px',
-                padding: '2px 10px',
-                color: 'var(--text-muted)',
-                fontSize: '11px',
-              }}>
-                {lesson.duration}
-              </span>
-            </div>
-            <h1 style={{ color: 'var(--text-primary)', fontSize: '22px', fontWeight: '800', lineHeight: '1.3' }}>
-              {lesson.title}
-            </h1>
+          {/* Scene Progress Bar */}
+          {slides.length > 0 && !slidesLoading && (
+            <SceneProgressBar
+              slides={slides}
+              activeSlideIdx={activeSlideIdx}
+              elapsedMs={elapsedMs}
+              onSceneSelect={goToScene}
+            />
+          )}
+
+          {/* Scene Viewer (scrollable) */}
+          <div style={{ flex: 1, overflowY: 'auto' }} className="custom-scrollbar">
+            {slidesLoading ? (
+              <div className="flex flex-col items-center justify-center h-64 gap-4">
+                <div className="w-8 h-8 border-2 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+                <span className="text-xs text-muted-foreground uppercase tracking-widest">Ładowanie treści...</span>
+              </div>
+            ) : slides.length > 0 ? (
+              <SceneViewer slide={currentSlide} slideKey={activeSlideIdx} />
+            ) : (
+              <div className="flex flex-col items-center justify-center h-64 text-muted-foreground italic">
+                Brak treści dla tej lekcji.
+              </div>
+            )}
           </div>
 
-          {/* Scrollable Content */}
-          <div style={{ flex: 1, overflowY: 'auto', padding: '28px 32px 40px' }}>
-            {lesson.content.type === 'intro'
-              ? <LessonIntro content={lesson.content} />
-              : <LessonContent content={lesson.content} />
-            }
-
-            {/* Navigation Buttons */}
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginTop: '40px',
-              paddingTop: '24px',
-              borderTop: '1px solid var(--border-subtle)',
-            }}>
-              <button
-                onClick={() => setActiveLesson(Math.max(0, activeLesson - 1))}
-                disabled={activeLesson === 0}
-                style={{
-                  background: 'transparent',
-                  border: '1px solid var(--border-subtle)',
-                  borderRadius: '10px',
-                  padding: '10px 20px',
-                  color: activeLesson === 0 ? 'var(--text-disabled)' : 'var(--text-secondary)',
-                  fontSize: '14px',
-                  cursor: activeLesson === 0 ? 'default' : 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  opacity: activeLesson === 0 ? 0.4 : 1,
-                }}
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" />
-                </svg>
-                Poprzednia
-              </button>
-
-              {completedLessons.has(activeLesson) ? (
-                <div style={{ display: 'flex', gap: '8px', alignItems: 'center', color: '#34d399', fontSize: '14px' }}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
-                  Ukończono
-                </div>
-              ) : (
-                <button
-                  onClick={markComplete}
-                  style={{
-                    background: 'var(--cyan-gradient)',
-                    border: 'none',
-                    borderRadius: '10px',
-                    padding: '10px 24px',
-                    color: 'white',
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    transition: 'opacity 0.15s',
-                  }}
-                  onMouseEnter={(e) => { e.currentTarget.style.opacity = '0.85' }}
-                  onMouseLeave={(e) => { e.currentTarget.style.opacity = '1' }}
-                >
-                  Oznacz jako ukończone
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
-                </button>
-              )}
-
-              <button
-                onClick={() => setActiveLesson(Math.min(lessons.length - 1, activeLesson + 1))}
-                disabled={activeLesson === lessons.length - 1}
-                style={{
-                  background: 'transparent',
-                  border: '1px solid var(--border-subtle)',
-                  borderRadius: '10px',
-                  padding: '10px 20px',
-                  color: activeLesson === lessons.length - 1 ? 'var(--text-disabled)' : 'var(--text-secondary)',
-                  fontSize: '14px',
-                  cursor: activeLesson === lessons.length - 1 ? 'default' : 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  opacity: activeLesson === lessons.length - 1 ? 0.4 : 1,
-                }}
-              >
-                Następna
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
-                </svg>
-              </button>
-            </div>
-          </div>
+          {/* Scene Controls */}
+          {slides.length > 0 && !slidesLoading && (
+            <SceneControls
+              isPaused={isPaused}
+              onPause={() => setIsPaused(true)}
+              onPlay={() => setIsPaused(false)}
+              onPrev={prevScene}
+              onNext={nextScene}
+              hasPrev={activeSlideIdx > 0}
+              hasNext={activeSlideIdx < slides.length - 1}
+              currentIdx={activeSlideIdx}
+              totalSlides={slides.length}
+            />
+          )}
         </main>
       </div>
     </div>

@@ -13,28 +13,12 @@ export default function DashboardPage() {
 
   if (error) {
     return (
-      <div style={{ 
-        height: '100vh', 
-        background: 'var(--bg-primary)', 
-        color: '#ef4444', 
-        display: 'flex', 
-        flexDirection: 'column',
-        alignItems: 'center', 
-        justifyContent: 'center',
-        gap: '20px'
-      }}>
-        <div style={{ fontSize: '20px', fontWeight: '700' }}>Wystąpił błąd podczas ładowania danych</div>
-        <div style={{ fontSize: '14px', opacity: 0.8 }}>{error}</div>
+      <div className="flex h-screen flex-col items-center justify-center gap-5 bg-background text-foreground">
+        <div className="text-xl font-extrabold text-red-500">Wystąpił błąd podczas ładowania danych</div>
+        <div className="text-sm opacity-80">{error}</div>
         <button 
           onClick={() => window.location.reload()}
-          style={{ 
-            background: 'var(--bg-secondary)', 
-            border: '1px solid var(--border-subtle)', 
-            color: 'white', 
-            padding: '10px 20px', 
-            borderRadius: '8px',
-            cursor: 'pointer'
-          }}
+          className="rounded-xl border border-border bg-secondary px-6 py-2.5 text-sm font-semibold hover:bg-secondary/80 transition-all"
         >
           Spróbuj ponownie
         </button>
@@ -47,39 +31,33 @@ export default function DashboardPage() {
     : 0
 
   return (
-    <div style={{ 
-      height: '100vh', 
-      background: 'var(--bg-primary)', 
-      color: 'var(--text-primary)', 
-      padding: '24px',
-      display: 'flex', 
-      flexDirection: 'column', 
-      gap: '40px',
-      overflowY: 'auto',
-      scrollbarGutter: 'stable'
-    }}>
+    <div className="flex h-screen flex-col bg-background text-foreground overflow-hidden font-sans antialiased">
       <Navbar user={user} />
       
-      <main style={{ maxWidth: '1200px', margin: '0 auto', width: '100%', display: 'flex', flexDirection: 'column', gap: '48px' }}>
-        <ActionHero 
-          lastLesson={lastLesson} 
-          streak={streak} 
-        />
-        
-        <section>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '24px' }}>
-            <div>
-              <h4 style={{ fontSize: '18px', fontWeight: '700', marginBottom: '4px' }}>Twoje ścieżki nauki</h4>
-              <p style={{ color: 'var(--text-muted)', fontSize: '13px' }}>Wybierz ścieżkę, aby zobaczyć szczegóły</p>
-            </div>
-            <div style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Suma postępów: {totalProgress}%</div>
-          </div>
+      <div className="flex-1 overflow-y-auto custom-scrollbar">
+        <main className="mx-auto flex w-full max-w-7xl flex-col gap-12 px-4 py-10 sm:px-6 lg:px-8">
+          <ActionHero 
+            lastLesson={lastLesson} 
+            streak={streak} 
+          />
           
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px' }}>
-            {paths.map(path => <PathCard key={path.id} path={path} />)}
-          </div>
-        </section>
-      </main>
+          <section>
+            <div className="mb-8 flex items-center justify-between">
+              <div>
+                <h4 className="mb-1 text-xl font-extrabold tracking-tight text-foreground">Twoje ścieżki nauki</h4>
+                <p className="text-sm text-muted-foreground">Kontynuuj swoją przygodę z AI</p>
+              </div>
+              <div className="rounded-xl border border-border bg-muted/30 px-3.5 py-1.5 text-xs font-semibold text-muted-foreground">
+                Suma postępów: <span className="text-foreground">{totalProgress}%</span>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+              {paths.map(path => <PathCard key={path.id} path={path} />)}
+            </div>
+          </section>
+        </main>
+      </div>
     </div>
   )
 }

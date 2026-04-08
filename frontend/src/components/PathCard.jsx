@@ -8,52 +8,126 @@ export default function PathCard({ path }) {
   return (
     <div 
       onClick={() => path.slug && navigate(`/kurs/${path.slug}`)}
+      className="glass card-hover group relative overflow-hidden"
       style={{
-        background: 'var(--bg-secondary)', 
-        border: `1px solid ${isStarted ? (isComplete ? 'var(--border-subtle)' : 'var(--cyan-border)') : 'var(--border-subtle)'}`,
-        borderRadius: '20px', padding: '24px', transition: 'all 0.2s',
-        cursor: 'pointer'
+        borderRadius: '24px', 
+        padding: '28px', 
+        cursor: 'pointer',
+        minHeight: '220px',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        background: `radial-gradient(circle at top right, hsla(var(--primary) / 0.08), transparent), hsla(var(--glass))`
       }}
-      onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.borderColor = 'var(--cyan)' }}
-      onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = isStarted ? (isComplete ? 'var(--border-subtle)' : 'var(--cyan-border)') : 'var(--border-subtle)' }}
     >
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
-        <div style={{ 
-          width: '48px', height: '48px', 
-          background: isStarted ? 'var(--cyan-dim)' : 'rgba(255,255,255,0.03)', 
-          borderRadius: '12px', display: 'flex', alignItems: 'center', 
-          justifyContent: 'center', fontSize: '24px' 
-        }}>{path.icon}</div>
+      {/* Ikona w tle */}
+      <div style={{
+        position: 'absolute',
+        top: '-10px',
+        right: '-10px',
+        fontSize: '120px',
+        opacity: 0.07,
+        transform: 'rotate(-15deg)',
+        pointerEvents: 'none',
+        transition: 'all 0.5s ease',
+      }} className="group-hover:scale-110 group-hover:rotate-0">
+        {path.icon}
+      </div>
+
+      {/* Góra karty */}
+      <div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
+          <div style={{ 
+            width: '44px', height: '44px', 
+            background: isStarted ? 'hsla(var(--primary) / 0.2)' : 'hsla(var(--foreground) / 0.05)', 
+            borderRadius: '12px', display: 'flex', alignItems: 'center', 
+            justifyContent: 'center', fontSize: '22px',
+            border: '1px solid hsla(var(--glass-border))'
+          }}>{path.icon}</div>
+          
+          {isComplete ? (
+            <div style={{ 
+              background: 'hsla(var(--muted) / 0.5)', 
+              color: 'var(--text-secondary)', 
+              fontSize: '10px', 
+              fontWeight: '800', 
+              padding: '4px 10px', 
+              borderRadius: '20px',
+              border: '1px solid hsla(var(--glass-border))',
+              letterSpacing: '0.05em'
+            }}>UKOŃCZONO</div>
+          ) : isStarted ? (
+            <div style={{ 
+              background: 'linear-gradient(135deg, hsla(var(--primary)), #3b82f6)', 
+              color: 'white', 
+              fontSize: '10px', 
+              fontWeight: '800', 
+              padding: '4px 10px', 
+              borderRadius: '20px',
+              boxShadow: '0 4px 12px hsla(var(--primary) / 0.3)'
+            }}>W TOKU</div>
+          ) : null}
+        </div>
+
+        <h5 style={{ 
+          fontSize: '18px', 
+          fontWeight: '800', 
+          marginBottom: '8px', 
+          color: 'hsl(var(--foreground))',
+          letterSpacing: '-0.01em'
+        }}>{path.title}</h5>
         
-        {isComplete ? (
-          <div style={{ color: 'var(--text-muted)', fontSize: '10px', fontWeight: '700', padding: '4px 8px', border: '1px solid var(--border-subtle)', borderRadius: '6px' }}>UKOŃCZONO</div>
-        ) : isStarted && (
-          <div style={{ background: 'var(--cyan)', color: 'white', fontSize: '10px', fontWeight: '700', padding: '4px 8px', borderRadius: '6px' }}>W TOKU</div>
+        {!isStarted && (
+          <p style={{ color: 'var(--text-secondary)', fontSize: '13px', lineHeight: '1.5', maxWidth: '90%' }}>
+            {path.subtitle}
+          </p>
         )}
       </div>
 
-      <h5 style={{ fontSize: '16px', fontWeight: '700', marginBottom: '16px' }}>{path.title}</h5>
-      
-      {isStarted ? (
-        <div style={{ marginBottom: '20px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', marginBottom: '8px' }}>
-            <span style={{ color: 'var(--text-muted)' }}>Postęp</span>
-            <span style={{ color: 'var(--text-primary)', fontWeight: '700' }}>{path.progress}%</span>
+      {/* Dół karty */}
+      <div>
+        {isStarted && (
+          <div style={{ marginBottom: '20px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', marginBottom: '8px' }}>
+              <span style={{ color: 'var(--text-secondary)', fontWeight: '500' }}>Twój postęp</span>
+              <span style={{ color: 'hsl(var(--foreground))', fontWeight: '800' }}>{path.progress}%</span>
+            </div>
+            <div style={{ height: '8px', background: 'hsla(var(--foreground) / 0.05)', borderRadius: '4px', overflow: 'hidden' }}>
+              <div style={{ 
+                width: `${path.progress}%`, 
+                height: '100%', 
+                background: 'linear-gradient(90deg, hsla(var(--primary)), #60a5fa)', 
+                borderRadius: '4px',
+                boxShadow: '0 0 10px hsla(var(--primary) / 0.5)'
+              }} />
+            </div>
           </div>
-          <div style={{ height: '6px', background: 'rgba(255,255,255,0.05)', borderRadius: '3px' }}>
-            <div style={{ width: `${path.progress}%`, height: '100%', background: 'var(--cyan-gradient)', borderRadius: '3px' }} />
-          </div>
-        </div>
-      ) : (
-        <p style={{ color: 'var(--text-muted)', fontSize: '12px', marginBottom: '24px', lineHeight: '1.4' }}>{path.subtitle}</p>
-      )}
-
-      <div style={{ display: 'flex', gap: '12px', fontSize: '11px', color: 'var(--text-muted)', paddingTop: '16px', borderTop: '1px solid var(--border-subtle)' }}>
-        {isStarted ? (
-          <><span>🔥 {path.streak || 0} dni</span><span>•</span><span>📍 {path.lessonsDone}/{path.lessonsTotal} lekcji</span></>
-        ) : (
-          <span style={{ color: 'var(--amber-light)', fontWeight: '700' }}>ZACZNIJ PRZYGODĘ →</span>
         )}
+
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          fontSize: '11px', 
+          color: 'var(--text-secondary)', 
+          paddingTop: '16px', 
+          borderTop: '1px solid hsla(var(--glass-border))' 
+        }}>
+          {isStarted ? (
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>🔥 {path.streak || 0} dni</span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>📚 {path.lessonsDone}/{path.lessonsTotal} lekcji</span>
+            </div>
+          ) : (
+            <span style={{ 
+              color: 'hsla(var(--primary))', 
+              fontWeight: '700', 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '4px' 
+            }}>Rozpocznij naukę <span style={{ fontSize: '14px' }}>→</span></span>
+          )}
+        </div>
       </div>
     </div>
   )

@@ -46,12 +46,14 @@ describe('MaterialsPage', () => {
 
   test('renders loading state initially', () => {
     materialsService.getMaterials.mockReturnValue(new Promise(() => {}));
-    render(
+    const { container } = render(
       <BrowserRouter>
         <MaterialsPage />
       </BrowserRouter>
     );
-    expect(screen.getByText(/ładowanie materiałów/i)).toBeInTheDocument();
+    // Check for skeleton loader pulses
+    const pulses = container.querySelectorAll('.animate-pulse');
+    expect(pulses.length).toBeGreaterThan(0);
   });
 
   test('renders materials after loading', async () => {
@@ -78,11 +80,13 @@ describe('MaterialsPage', () => {
 
     await waitFor(() => expect(screen.getByText('Cursor')).toBeInTheDocument());
 
-    const searchInput = screen.getByPlaceholderText(/szukaj/i);
+    const searchInput = screen.getByPlaceholderText(/szukaj materiałów/i);
     fireEvent.change(searchInput, { target: { value: 'Cursor' } });
 
-    expect(screen.getByText('Cursor')).toBeInTheDocument();
-    expect(screen.queryByText('LangChain')).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Cursor')).toBeInTheDocument();
+      expect(screen.queryByText('LangChain')).not.toBeInTheDocument();
+    });
   });
 
   test('filters materials by category', async () => {
@@ -98,7 +102,9 @@ describe('MaterialsPage', () => {
     const toolCheckbox = screen.getByLabelText('Narzędzie');
     fireEvent.click(toolCheckbox);
 
-    expect(screen.getByText('Cursor')).toBeInTheDocument();
-    expect(screen.queryByText('LangChain')).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Cursor')).toBeInTheDocument();
+      expect(screen.queryByText('LangChain')).not.toBeInTheDocument();
+    });
   });
 });

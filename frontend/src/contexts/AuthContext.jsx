@@ -17,6 +17,7 @@ async function fetchRole(userId) {
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
+  const [session, setSession] = useState(null)
   const [role, setRole] = useState(() => localStorage.getItem(ROLE_CACHE_KEY))
   const [loading, setLoading] = useState(true)
 
@@ -25,34 +26,47 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     let mounted = true
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      const u = session?.user ?? null
-      if (mounted) setUser(u)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, s) => {
+      const u = s?.user ?? null
+      if (mounted) {
+        setUser(u)
+        setSession(s ?? null)
+      }
 
-      if (event === 'SIGNED_OUT') {
+      if (event === 'INITIAL_SESSION') {
+        if (mounted) setLoading(false)
+        if (u) {
+          fetchRole(u.id)
+            .then(r => {
+              if (mounted) {
+                localStorage.setItem(ROLE_CACHE_KEY, r)
+                setRole(r)
+              }
+            })
+            .catch(() => {})
+        } else {
+          if (mounted) {
+            localStorage.removeItem(ROLE_CACHE_KEY)
+            setRole(null)
+          }
+        }
+      } else if (event === 'SIGNED_OUT') {
         localStorage.removeItem(ROLE_CACHE_KEY)
         if (mounted) {
           setRole(null)
           setLoading(false)
         }
-        return
-      }
-
-      if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN') {
+      } else if (event === 'SIGNED_IN') {
         if (mounted) setLoading(false)
-
         if (u) {
-          try {
-            const r = await fetchRole(u.id)
-            if (mounted) {
-              localStorage.setItem(ROLE_CACHE_KEY, r)
-              setRole(r)
-            }
-          } catch {
-            if (mounted && !localStorage.getItem(ROLE_CACHE_KEY)) {
-              setRole('user')
-            }
-          }
+          fetchRole(u.id)
+            .then(r => {
+              if (mounted) {
+                localStorage.setItem(ROLE_CACHE_KEY, r)
+                setRole(r)
+              }
+            })
+            .catch(() => {})
         }
       }
     })
@@ -63,7 +77,7 @@ export function AuthProvider({ children }) {
     }
   }, [])
 
-  const value = useMemo(() => ({ user, role, loading }), [user, role, loading])
+  const value = useMemo(() => ({ user, session, role, loading }), [user, session, role, loading])
 
   return (
     <AuthContext.Provider value={value}>

@@ -4,7 +4,7 @@ export default function ActionHero({ lastLesson, streak = 7 }) {
   const navigate = useNavigate()
   return (
     <div style={{
-      background: 'linear-gradient(135deg, rgba(6, 182, 212, 0.15) 0%, rgba(13, 13, 42, 0) 100%)',
+      background: 'linear-gradient(135deg, var(--cyan-dim) 0%, transparent 100%)',
       border: '1px solid var(--cyan-border)', borderRadius: '24px',
       padding: '48px', display: 'flex', justifyContent: 'space-between',
       alignItems: 'center', position: 'relative', overflow: 'hidden'
@@ -26,8 +26,8 @@ export default function ActionHero({ lastLesson, streak = 7 }) {
           Twoja ostatnia lekcja • {lastLesson?.pathName ?? 'Wprowadzenie'}
         </p>
         
-        <button 
-          onClick={() => navigate('/kurs/wspolna')} // Currently only 'wspolna' exists
+        <button
+          onClick={() => navigate(`/kurs/${lastLesson?.pathSlug ?? 'wspolna'}`)}
           style={{
             background: 'var(--cyan-gradient)', color: 'white', padding: '14px 36px',
             borderRadius: '12px', fontWeight: '700', fontSize: '16px', border: 'none',
