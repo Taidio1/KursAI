@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom'
+import { motion } from 'framer-motion'
 
 export default function PathCard({ path }) {
   const navigate = useNavigate()
@@ -6,12 +7,12 @@ export default function PathCard({ path }) {
   const isComplete = path.progress === 100
 
   return (
-    <div 
+    <motion.div
       onClick={() => path.slug && navigate(`/kurs/${path.slug}`)}
       className="glass card-hover group relative overflow-hidden"
       style={{
-        borderRadius: '24px', 
-        padding: '28px', 
+        borderRadius: '24px',
+        padding: '28px',
         cursor: 'pointer',
         minHeight: '220px',
         display: 'flex',
@@ -19,6 +20,8 @@ export default function PathCard({ path }) {
         justifyContent: 'space-between',
         background: `radial-gradient(circle at top right, hsla(var(--primary) / 0.08), transparent), hsla(var(--glass))`
       }}
+      whileTap={{ scale: 0.97 }}
+      transition={{ type: 'spring', stiffness: 400, damping: 25 }}
     >
       {/* Ikona w tle */}
       <div style={{
@@ -129,6 +132,6 @@ export default function PathCard({ path }) {
           )}
         </div>
       </div>
-    </div>
+    </motion.div>
   )
 }

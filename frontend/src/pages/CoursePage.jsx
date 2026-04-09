@@ -7,6 +7,7 @@ import SceneProgressBar from '../components/SceneProgressBar'
 import SceneViewer from '../components/SceneViewer'
 import SceneControls from '../components/SceneControls'
 import { useSceneTimer } from '../hooks/useSceneTimer'
+import PageTransition from '../components/PageTransition'
 
 export default function CoursePage() {
   const { user } = useAuth()
@@ -275,6 +276,7 @@ export default function CoursePage() {
   }
 
   return (
+    <PageTransition>
     <div style={{ height: '100vh', background: 'var(--bg-primary)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
       {/* Header */}
@@ -583,5 +585,6 @@ export default function CoursePage() {
         </main>
       </div>
     </div>
+    </PageTransition>
   )
 }

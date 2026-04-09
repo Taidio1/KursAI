@@ -4,6 +4,7 @@ import Navbar from '../components/Navbar'
 import ActionHero from '../components/ActionHero'
 import PathCard from '../components/PathCard'
 import DashboardSkeleton from '../components/DashboardSkeleton'
+import PageTransition from '../components/PageTransition'
 
 export default function DashboardPage() {
   const { user } = useAuth()
@@ -31,33 +32,35 @@ export default function DashboardPage() {
     : 0
 
   return (
-    <div className="flex h-screen flex-col bg-background text-foreground overflow-hidden font-sans antialiased">
-      <Navbar user={user} />
-      
-      <div className="flex-1 overflow-y-auto custom-scrollbar">
-        <main className="mx-auto flex w-full max-w-7xl flex-col gap-12 px-4 py-10 sm:px-6 lg:px-8">
-          <ActionHero 
-            lastLesson={lastLesson} 
-            streak={streak} 
-          />
-          
-          <section>
-            <div className="mb-8 flex items-center justify-between">
-              <div>
-                <h4 className="mb-1 text-xl font-extrabold tracking-tight text-foreground">Twoje ścieżki nauki</h4>
-                <p className="text-sm text-muted-foreground">Kontynuuj swoją przygodę z AI</p>
+    <PageTransition>
+      <div className="flex h-screen flex-col bg-background text-foreground overflow-hidden font-sans antialiased">
+        <Navbar user={user} />
+
+        <div className="flex-1 overflow-y-auto custom-scrollbar">
+          <main className="mx-auto flex w-full max-w-7xl flex-col gap-12 px-4 py-10 sm:px-6 lg:px-8">
+            <ActionHero
+              lastLesson={lastLesson}
+              streak={streak}
+            />
+
+            <section>
+              <div className="mb-8 flex items-center justify-between">
+                <div>
+                  <h4 className="mb-1 text-xl font-extrabold tracking-tight text-foreground">Twoje ścieżki nauki</h4>
+                  <p className="text-sm text-muted-foreground">Kontynuuj swoją przygodę z AI</p>
+                </div>
+                <div className="rounded-xl border border-border bg-muted/30 px-3.5 py-1.5 text-xs font-semibold text-muted-foreground">
+                  Suma postępów: <span className="text-foreground">{totalProgress}%</span>
+                </div>
               </div>
-              <div className="rounded-xl border border-border bg-muted/30 px-3.5 py-1.5 text-xs font-semibold text-muted-foreground">
-                Suma postępów: <span className="text-foreground">{totalProgress}%</span>
+
+              <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+                {paths.map(path => <PathCard key={path.id} path={path} />)}
               </div>
-            </div>
-            
-            <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-              {paths.map(path => <PathCard key={path.id} path={path} />)}
-            </div>
-          </section>
-        </main>
+            </section>
+          </main>
+        </div>
       </div>
-    </div>
+    </PageTransition>
   )
 }

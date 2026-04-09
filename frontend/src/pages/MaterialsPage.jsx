@@ -7,6 +7,7 @@ import MaterialsHeader from '../components/MaterialsHeader';
 import Navbar from '../components/Navbar';
 import { Search } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import PageTransition from '../components/PageTransition';
 
 export default function MaterialsPage() {
   const { user } = useAuth();
@@ -98,6 +99,7 @@ export default function MaterialsPage() {
   }, [gridCols]);
 
   return (
+    <PageTransition>
     <div className="flex flex-col h-screen bg-background text-foreground overflow-hidden font-sans antialiased">
       <Navbar user={user} />
       
@@ -174,12 +176,13 @@ export default function MaterialsPage() {
 
       {/* Modal - Rendered at the end of root to stay on top */}
       {selectedMaterial && (
-        <MaterialDetailsCard 
-          material={selectedMaterial} 
+        <MaterialDetailsCard
+          material={selectedMaterial}
           onClose={() => handleMaterialSelect(null)}
           onTagClick={handleTagClick}
         />
       )}
     </div>
+    </PageTransition>
   );
 }

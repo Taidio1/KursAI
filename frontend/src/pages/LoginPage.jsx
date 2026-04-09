@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import PageTransition from '../components/PageTransition'
 
 const styles = {
   page: {
@@ -94,6 +95,7 @@ export default function LoginPage() {
   }
 
   return (
+    <PageTransition>
     <div style={styles.page}>
       <form style={styles.card} onSubmit={handleSubmit}>
         <div>
@@ -125,5 +127,6 @@ export default function LoginPage() {
         </div>
       </form>
     </div>
+    </PageTransition>
   )
 }
