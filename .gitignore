@@ -13,6 +13,9 @@ build/
 .npm
 .eslintcache
 
+# Frontend lib exception (Python gitignore has lib/ but frontend/src/lib/ must be tracked)
+!frontend/src/lib/
+
 # Python
 __pycache__/
 *.py[cod]
