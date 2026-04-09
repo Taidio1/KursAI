@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
 import { courseService } from '../services/courseService'
+import { pathCache } from '../lib/pathCache'
 import SceneProgressBar from '../components/SceneProgressBar'
 import SceneViewer from '../components/SceneViewer'
 import SceneControls from '../components/SceneControls'
@@ -31,54 +32,67 @@ export default function CoursePage() {
 
   const currentSlug = pathSlug || 'wspolna'
 
-  // 1. Fetch path and lessons list
+  // 1. Fetch path and lessons list (parallel: path details + user progress)
   useEffect(() => {
     async function loadPathData() {
       if (!user?.id) return;
-      
-      try {
-        setLoading(true)
-        console.log('Fetching path details for:', currentSlug)
-        const data = await courseService.getPathDetails(currentSlug)
-        console.log('Path details received:', data)
-        setPath(data)
-        
-        // Flatten lessons from courses
-        const allLessons = data.courses.flatMap(c => c.lessons)
-        setLessons(allLessons)
-        
-        // At this point we have the basic UI data, we can stop the top-level loading
-        setLoading(false)
 
-        // Fetch user progress separately
-        try {
-          console.log('Fetching user progress for:', user.id)
-          const { data: progress, error } = await supabase
+      try {
+        const cached = pathCache.get(currentSlug)
+
+        if (cached) {
+          // Instant render from prefetch cache – no loading spinner
+          const allLessons = cached.courses.flatMap(c => c.lessons)
+          setPath(cached)
+          setLessons(allLessons)
+          setLoading(false)
+
+          // Fetch progress in background
+          const { data: progress, error: progressErr } = await supabase
             .from('user_progress')
             .select('lesson_id')
             .eq('user_id', user.id)
             .not('completed_at', 'is', null)
-            
-          if (error) throw error
-          if (progress) {
+
+          if (!progressErr && progress) {
             const completedSet = new Set(progress.map(p => p.lesson_id))
             setCompletedLessons(completedSet)
             const firstIncompleteIdx = allLessons.findIndex(l => !completedSet.has(l.id))
-            if (firstIncompleteIdx > 0) {
-              setActiveLessonIdx(firstIncompleteIdx)
-            }
+            if (firstIncompleteIdx > 0) setActiveLessonIdx(firstIncompleteIdx)
           }
-        } catch (progressErr) {
-          console.error('Error loading progress (continuing without it):', progressErr)
+          return
         }
-        
+
+        // No cache: fetch path details and user progress in parallel
+        setLoading(true)
+        const [data, { data: progress, error: progressErr }] = await Promise.all([
+          courseService.getPathDetails(currentSlug),
+          supabase
+            .from('user_progress')
+            .select('lesson_id')
+            .eq('user_id', user.id)
+            .not('completed_at', 'is', null)
+        ])
+
+        pathCache.set(currentSlug, data)
+        const allLessons = data.courses.flatMap(c => c.lessons)
+        setPath(data)
+        setLessons(allLessons)
+        setLoading(false)
+
+        if (!progressErr && progress) {
+          const completedSet = new Set(progress.map(p => p.lesson_id))
+          setCompletedLessons(completedSet)
+          const firstIncompleteIdx = allLessons.findIndex(l => !completedSet.has(l.id))
+          if (firstIncompleteIdx > 0) setActiveLessonIdx(firstIncompleteIdx)
+        }
       } catch (err) {
         console.error('Error loading path:', err)
         setError(err.message || 'Nie udało się załadować ścieżki')
         setLoading(false)
       }
     }
-    
+
     loadPathData()
   }, [currentSlug, user?.id])
 

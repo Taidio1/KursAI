@@ -1,14 +1,25 @@
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
+import { courseService } from '../services/courseService'
+import { pathCache } from '../lib/pathCache'
 
 export default function PathCard({ path }) {
   const navigate = useNavigate()
   const isStarted = path.progress > 0
   const isComplete = path.progress === 100
 
+  function handleMouseEnter() {
+    if (path.slug && !pathCache.get(path.slug)) {
+      courseService.getPathDetails(path.slug)
+        .then(data => pathCache.set(path.slug, data))
+        .catch(() => {})
+    }
+  }
+
   return (
     <motion.div
       onClick={() => path.slug && navigate(`/kurs/${path.slug}`)}
+      onMouseEnter={handleMouseEnter}
       className="glass card-hover group relative overflow-hidden"
       style={{
         borderRadius: '24px',
