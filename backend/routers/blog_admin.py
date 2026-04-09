@@ -1,6 +1,8 @@
 import os
 import asyncio
-from fastapi import APIRouter, HTTPException, Header
+import uuid
+import mimetypes
+from fastapi import APIRouter, HTTPException, Header, UploadFile, File
 from typing import List, Optional
 from pydantic import BaseModel
 from datetime import datetime, timezone
@@ -57,6 +59,55 @@ async def get_all_posts(x_admin_secret: Optional[str] = Header(None)):
         raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
 
 
+class BlogPostCreate(BaseModel):
+    title: str
+    lead: Optional[str] = ""
+    author: Optional[str] = ""
+    tags: Optional[List[str]] = []
+    content_markdown: Optional[str] = ""
+    status: Optional[str] = "draft"
+
+
+@router.post("/posts", status_code=201)
+async def create_post(
+    body: BlogPostCreate,
+    x_admin_secret: Optional[str] = Header(None),
+):
+    _require_admin(x_admin_secret)
+    supabase = get_supabase_service()
+
+    # Generuj slug z tytułu
+    import re
+    import unicodedata
+    raw = unicodedata.normalize("NFD", body.title)
+    raw = raw.encode("ascii", "ignore").decode("ascii")
+    slug_base = re.sub(r"[^a-z0-9]+", "-", raw.lower()).strip("-") or "wpis"
+    # Upewnij się że slug jest unikalny
+    slug = slug_base
+    suffix = 1
+    while True:
+        existing = supabase.table("blog_posts").select("id").eq("slug", slug).execute()
+        if not existing.data:
+            break
+        slug = f"{slug_base}-{suffix}"
+        suffix += 1
+
+    data = {
+        "title": body.title,
+        "lead": body.lead,
+        "author": body.author,
+        "tags": body.tags,
+        "content_markdown": body.content_markdown,
+        "status": body.status,
+        "slug": slug,
+    }
+    try:
+        response = supabase.table("blog_posts").insert(data).execute()
+        return response.data[0] if response.data else {}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+
+
 @router.patch("/posts/{post_id}")
 async def update_post(
     post_id: str,
@@ -92,6 +143,48 @@ async def delete_post(post_id: str, x_admin_secret: Optional[str] = Header(None)
         return {"deleted": post_id}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+
+
+@router.post("/upload-image")
+async def upload_image(
+    file: UploadFile = File(...),
+    x_admin_secret: Optional[str] = Header(None),
+):
+    _require_admin(x_admin_secret)
+
+    # Walidacja typu MIME
+    ALLOWED_MIME = {"image/png", "image/gif", "image/jpeg", "image/webp"}
+    mime = file.content_type or mimetypes.guess_type(file.filename or "")[0] or ""
+    if mime not in ALLOWED_MIME:
+        raise HTTPException(status_code=415, detail=f"Niedozwolony typ pliku: {mime}. Obsługiwane: PNG, GIF, JPEG, WebP.")
+
+    # Walidacja rozmiaru (max 5 MB)
+    MAX_SIZE = 5 * 1024 * 1024
+    contents = await file.read()
+    if len(contents) > MAX_SIZE:
+        raise HTTPException(status_code=413, detail="Plik jest za duży. Maksymalny rozmiar to 5 MB.")
+
+    # Generuj unikalną nazwę pliku zachowując oryginalne rozszerzenie
+    ext = (file.filename or "").rsplit(".", 1)[-1].lower() if "." in (file.filename or "") else "bin"
+    filename = f"{uuid.uuid4().hex}.{ext}"
+    storage_path = f"blog/{filename}"
+
+    # Upload do Supabase Storage (bucket: blog-images)
+    supabase = get_supabase_service()
+    try:
+        supabase.storage.from_("blog-images").upload(
+            path=storage_path,
+            file=contents,
+            file_options={"content-type": mime},
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Błąd Supabase Storage: {str(e)}")
+
+    # Zbuduj publiczny URL
+    supabase_url = os.environ.get("SUPABASE_URL", "")
+    public_url = f"{supabase_url}/storage/v1/object/public/blog-images/{storage_path}"
+
+    return {"url": public_url}
 
 
 async def _auto_publish_loop():

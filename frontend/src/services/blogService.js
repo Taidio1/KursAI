@@ -22,6 +22,19 @@ export const blogService = {
     return response.json();
   },
 
+  async createPost(data) {
+    const response = await fetch(`${API_URL}/blog-admin/posts`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Admin-Secret': ADMIN_SECRET,
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) throw new Error('Failed to create post');
+    return response.json();
+  },
+
   async updatePost(id, patch) {
     const response = await fetch(`${API_URL}/blog-admin/posts/${id}`, {
       method: 'PATCH',
@@ -33,6 +46,21 @@ export const blogService = {
     });
     if (!response.ok) throw new Error('Failed to update post');
     return response.json();
+  },
+
+  async uploadImage(file) {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await fetch(`${API_URL}/blog-admin/upload-image`, {
+      method: 'POST',
+      headers: { 'X-Admin-Secret': ADMIN_SECRET },
+      body: formData,
+    });
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err.detail || 'Błąd wgrywania obrazu');
+    }
+    return response.json(); // { url: string }
   },
 
   async deletePost(id) {

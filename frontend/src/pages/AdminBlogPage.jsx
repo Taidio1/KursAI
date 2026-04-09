@@ -2,7 +2,9 @@ import { useState, useEffect } from 'react'
 import Navbar from '../components/Navbar'
 import PageTransition from '../components/PageTransition'
 import { blogService } from '../services/blogService'
-import { Check, Clock, Trash2, Eye, X } from 'lucide-react'
+import PostEditorModal from '../components/blog/PostEditorModal'
+import PostPreviewModal from '../components/blog/PostPreviewModal'
+import { Check, Clock, Trash2, Eye, X, Pencil, Plus } from 'lucide-react'
 
 const STATUS_LABELS = {
   draft: 'Draft',
@@ -16,11 +18,14 @@ const STATUS_COLORS = {
   published: 'bg-emerald-500/10 text-emerald-400',
 }
 
-const TABS = ['draft', 'scheduled', 'published']
+const TABS = ['published', 'draft', 'scheduled']
 
 function formatDate(iso) {
   if (!iso) return '—'
-  return new Date(iso).toLocaleDateString('pl-PL', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+  return new Date(iso).toLocaleDateString('pl-PL', {
+    day: 'numeric', month: 'short', year: 'numeric',
+    hour: '2-digit', minute: '2-digit',
+  })
 }
 
 export default function AdminBlogPage() {
@@ -30,7 +35,11 @@ export default function AdminBlogPage() {
   const [schedulePostId, setSchedulePostId] = useState(null)
   const [scheduleDate, setScheduleDate] = useState('')
   const [previewPost, setPreviewPost] = useState(null)
+  const [editPost, setEditPost] = useState(null)
   const [actionLoading, setActionLoading] = useState(null)
+  const [savingEdit, setSavingEdit] = useState(false)
+  const [creatingNew, setCreatingNew] = useState(false)
+  const [savingNew, setSavingNew] = useState(false)
 
   const loadPosts = () => {
     setLoading(true)
@@ -53,7 +62,10 @@ export default function AdminBlogPage() {
   const handleSchedule = async (id) => {
     if (!scheduleDate) return
     setActionLoading(id)
-    await blogService.updatePost(id, { status: 'scheduled', scheduled_at: new Date(scheduleDate).toISOString() })
+    await blogService.updatePost(id, {
+      status: 'scheduled',
+      scheduled_at: new Date(scheduleDate).toISOString(),
+    })
     setSchedulePostId(null)
     setScheduleDate('')
     loadPosts()
@@ -68,14 +80,49 @@ export default function AdminBlogPage() {
     setActionLoading(null)
   }
 
+  const handleSaveEdit = async (patch) => {
+    if (!editPost) return
+    setSavingEdit(true)
+    try {
+      await blogService.updatePost(editPost.id, patch)
+      setEditPost(null)
+      loadPosts()
+    } catch (err) {
+      console.error('Błąd zapisu:', err)
+    } finally {
+      setSavingEdit(false)
+    }
+  }
+
+  const handleCreate = async (data) => {
+    setSavingNew(true)
+    try {
+      await blogService.createPost({ ...data, status: 'draft' })
+      setCreatingNew(false)
+      loadPosts()
+    } catch (err) {
+      console.error('Błąd tworzenia wpisu:', err)
+    } finally {
+      setSavingNew(false)
+    }
+  }
+
   return (
     <PageTransition>
       <div className="min-h-screen bg-background text-foreground">
         <Navbar />
         <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
-          <div className="mb-8">
-            <h1 className="text-3xl font-black tracking-tight mb-1">Blog — panel admina</h1>
-            <p className="text-muted-foreground text-sm">Zarządzaj wpisami dostarczanymi przez n8n</p>
+          <div className="mb-8 flex items-start justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-black tracking-tight mb-1">Blog — panel admina</h1>
+              <p className="text-muted-foreground text-sm">Zarządzaj wpisami bloga</p>
+            </div>
+            <button
+              onClick={() => setCreatingNew(true)}
+              className="flex items-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground rounded-xl text-sm font-bold hover:opacity-90 transition-all flex-shrink-0"
+            >
+              <Plus size={16} /> Nowy wpis
+            </button>
           </div>
 
           {/* Tabs */}
@@ -108,7 +155,7 @@ export default function AdminBlogPage() {
           )}
 
           {!loading && filtered.map(post => (
-            <div key={post.id} className="border border-border rounded-xl p-5 mb-3 bg-card/30">
+            <div key={post.id} className="border border-border rounded-xl p-5 mb-3 bg-card/30 hover:bg-card/50 transition-colors">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-2">
@@ -116,7 +163,7 @@ export default function AdminBlogPage() {
                       {STATUS_LABELS[post.status]}
                     </span>
                     {post.tags?.map(tag => (
-                      <span key={tag} className="text-[10px] text-muted-foreground">{tag}</span>
+                      <span key={tag} className="text-[10px] text-muted-foreground">#{tag}</span>
                     ))}
                   </div>
                   <h3 className="font-black text-base mb-1 truncate">{post.title}</h3>
@@ -129,7 +176,8 @@ export default function AdminBlogPage() {
                 </div>
 
                 {/* Akcje */}
-                <div className="flex items-center gap-2 flex-shrink-0">
+                <div className="flex items-center gap-1.5 flex-shrink-0">
+                  {/* Podgląd */}
                   <button
                     onClick={() => setPreviewPost(post)}
                     className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all"
@@ -137,6 +185,16 @@ export default function AdminBlogPage() {
                   >
                     <Eye size={15} />
                   </button>
+
+                  {/* Edytuj */}
+                  <button
+                    onClick={() => setEditPost(post)}
+                    className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all"
+                    title="Edytuj"
+                  >
+                    <Pencil size={15} />
+                  </button>
+
                   {post.status !== 'published' && (
                     <button
                       onClick={() => handlePublish(post.id)}
@@ -147,6 +205,7 @@ export default function AdminBlogPage() {
                       <Check size={13} /> Publikuj
                     </button>
                   )}
+
                   {post.status === 'draft' && (
                     <button
                       onClick={() => setSchedulePostId(post.id)}
@@ -156,6 +215,7 @@ export default function AdminBlogPage() {
                       <Clock size={13} /> Zaplanuj
                     </button>
                   )}
+
                   <button
                     onClick={() => handleDelete(post.id)}
                     disabled={actionLoading === post.id}
@@ -197,26 +257,27 @@ export default function AdminBlogPage() {
 
         {/* Preview modal */}
         {previewPost && (
-          <div
-            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
-            onClick={() => setPreviewPost(null)}
-          >
-            <div
-              className="bg-background border border-border rounded-2xl max-w-2xl w-full max-h-[80vh] overflow-y-auto p-8"
-              onClick={e => e.stopPropagation()}
-            >
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="font-black text-lg">{previewPost.title}</h2>
-                <button onClick={() => setPreviewPost(null)} className="text-muted-foreground hover:text-foreground">
-                  <X size={18} />
-                </button>
-              </div>
-              <p className="text-muted-foreground text-sm mb-6">{previewPost.lead}</p>
-              <div className="text-sm text-foreground whitespace-pre-wrap font-mono bg-card/50 border border-border rounded-xl p-4 overflow-auto max-h-80">
-                {previewPost.content_markdown}
-              </div>
-            </div>
-          </div>
+          <PostPreviewModal post={previewPost} onClose={() => setPreviewPost(null)} />
+        )}
+
+        {/* Editor modal */}
+        {editPost && (
+          <PostEditorModal
+            post={editPost}
+            onClose={() => setEditPost(null)}
+            onSave={handleSaveEdit}
+            saving={savingEdit}
+          />
+        )}
+        {/* New post modal */}
+        {creatingNew && (
+          <PostEditorModal
+            post={null}
+            isNew
+            onClose={() => setCreatingNew(false)}
+            onSave={handleCreate}
+            saving={savingNew}
+          />
         )}
       </div>
     </PageTransition>

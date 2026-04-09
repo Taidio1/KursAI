@@ -148,28 +148,26 @@ export default function AdminMaterials() {
         <table className="w-full text-sm">
           <thead className="border-b border-border bg-secondary/50">
             <tr>
-              {['Tytuł', 'Kategoria', 'Cena', 'Tagi', 'Status', ''].map(h => (
+              {['Tytuł', 'Kategoria', 'Tagi', 'Status', 'Akcje'].map(h => (
                 <th key={h} className="p-3 text-left text-[11px] font-bold uppercase tracking-widest text-muted-foreground">{h}</th>
               ))}
             </tr>
           </thead>
           <tbody>
             {materials.length === 0 && (
-              <tr><td colSpan={6} className="p-6 text-center text-sm text-muted-foreground">Brak materiałów</td></tr>
+              <tr><td colSpan={5} className="p-6 text-center text-sm text-muted-foreground">Brak materiałów</td></tr>
             )}
             {materials.map(mat => (
               <tr key={mat.id} className="border-t border-border hover:bg-secondary/20 transition-colors">
                 <td className="p-3">
                   <div className="flex items-center gap-2">
-                    {mat.icon_url && <span className="text-base">{mat.icon_url}</span>}
-                    <div>
-                      <div className="font-semibold text-foreground">{mat.title}</div>
-                      {mat.description && <div className="text-xs text-muted-foreground truncate max-w-[200px]">{mat.description}</div>}
+                    {mat.icon_url && <span className="text-base shrink-0">{mat.icon_url}</span>}
+                    <div className="font-semibold text-foreground truncate max-w-[250px]" title={mat.title}>
+                      {mat.title}
                     </div>
                   </div>
                 </td>
                 <td className="p-3 text-xs text-muted-foreground">{mat.category || '–'}</td>
-                <td className="p-3 text-xs text-muted-foreground">{mat.price || '–'}</td>
                 <td className="p-3">
                   <div className="flex flex-wrap gap-1">
                     {mat.tags?.slice(0, 3).map(tag => (
@@ -191,14 +189,11 @@ export default function AdminMaterials() {
                 </td>
                 <td className="p-3">
                   <div className="flex items-center gap-1">
-                    <a href={mat.url} target="_blank" rel="noopener noreferrer" className="rounded-lg p-1.5 text-muted-foreground hover:text-foreground transition-colors">
-                      <ExternalLink size={13} />
-                    </a>
-                    <button onClick={() => setModal({ mat: { ...mat, tags: mat.tags?.join(', ') || '' } })} className="rounded-lg p-1.5 text-muted-foreground hover:text-primary transition-colors">
-                      <Edit3 size={13} />
+                    <button onClick={() => setModal({ mat: { ...mat, tags: mat.tags?.join(', ') || '' } })} className="rounded-lg p-1.5 text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors">
+                      <Edit3 size={14} />
                     </button>
-                    <button onClick={() => confirmDelete(mat)} className="rounded-lg p-1.5 text-muted-foreground hover:text-red-400 transition-colors">
-                      <Trash2 size={13} />
+                    <button onClick={() => confirmDelete(mat)} className="rounded-lg p-1.5 text-muted-foreground hover:text-red-400 hover:bg-red-400/10 transition-colors">
+                      <Trash2 size={14} />
                     </button>
                   </div>
                 </td>

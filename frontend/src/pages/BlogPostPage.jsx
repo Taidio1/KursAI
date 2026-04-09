@@ -79,13 +79,59 @@ export default function BlogPostPage() {
               </div>
 
               {/* Treść Markdown */}
-              <div className="prose prose-invert prose-sm max-w-none
-                prose-headings:font-black prose-headings:tracking-tight
-                prose-a:text-primary prose-a:no-underline hover:prose-a:opacity-80
-                prose-code:bg-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm
-                prose-pre:bg-card prose-pre:border prose-pre:border-border
-                prose-blockquote:border-l-primary prose-blockquote:text-muted-foreground">
-                <ReactMarkdown>{post.content_markdown}</ReactMarkdown>
+              <div className="prose-blog">
+                <ReactMarkdown
+                  components={{
+                    h1: ({ children }) => <h1 className="text-2xl font-black mb-3 mt-6 tracking-tight">{children}</h1>,
+                    h2: ({ children }) => <h2 className="text-xl font-bold mb-2 mt-5 tracking-tight">{children}</h2>,
+                    h3: ({ children }) => <h3 className="text-base font-bold mb-2 mt-4">{children}</h3>,
+                    p: ({ children }) => <p className="text-sm leading-relaxed mb-4 text-foreground">{children}</p>,
+                    a: ({ href, children }) => (
+                      <a
+                        href={href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary underline underline-offset-2 hover:opacity-80 transition-opacity"
+                      >
+                        {children}
+                      </a>
+                    ),
+                    img: ({ src, alt }) => (
+                      <figure className="my-5">
+                        <img
+                          src={src}
+                          alt={alt}
+                          className="rounded-xl w-full max-h-80 object-cover border border-border"
+                          loading="lazy"
+                        />
+                        {alt && <figcaption className="text-center text-xs text-muted-foreground mt-2">{alt}</figcaption>}
+                      </figure>
+                    ),
+                    blockquote: ({ children }) => (
+                      <blockquote className="border-l-4 border-primary/50 pl-4 py-1 my-4 text-muted-foreground italic text-sm">
+                        {children}
+                      </blockquote>
+                    ),
+                    code: ({ children }) => (
+                      <code className="bg-card/80 border border-border rounded px-1.5 py-0.5 text-xs font-mono text-foreground">
+                        {children}
+                      </code>
+                    ),
+                    pre: ({ children }) => (
+                      <pre className="bg-card/80 border border-border rounded-xl p-4 overflow-x-auto text-xs font-mono my-4">
+                        {children}
+                      </pre>
+                    ),
+                    ul: ({ children }) => <ul className="list-disc list-inside space-y-1 mb-4 text-sm">{children}</ul>,
+                    ol: ({ children }) => <ol className="list-decimal list-inside space-y-1 mb-4 text-sm">{children}</ol>,
+                    li: ({ children }) => <li className="text-foreground leading-relaxed">{children}</li>,
+                    strong: ({ children }) => <strong className="font-bold text-foreground">{children}</strong>,
+                    em: ({ children }) => <em className="italic">{children}</em>,
+                    hr: () => <hr className="border-border my-6" />,
+                  }}
+                >
+                  {post.content_markdown}
+                </ReactMarkdown>
               </div>
 
               {/* Powrót */}
