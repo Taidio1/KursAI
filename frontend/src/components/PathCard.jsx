@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { courseService } from '../services/courseService'
-import { pathCache } from '../lib/pathCache'
+import { pathCache } from '../services/pathCache'
 
 export default function PathCard({ path }) {
   const navigate = useNavigate()
