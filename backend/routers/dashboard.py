@@ -5,7 +5,7 @@ from typing import List, Optional
 from pydantic import BaseModel
 from datetime import datetime, timedelta
 
-from dependencies import get_supabase_anon, get_current_user
+from dependencies import get_supabase_service, get_current_user
 
 router = APIRouter(prefix="/dashboard", tags=["dashboard"])
 
@@ -40,7 +40,7 @@ class DashboardResponse(BaseModel):
 async def get_user_stats(current_user=Depends(get_current_user)):
     """Agreguje dane dashboardu dla zalogowanego użytkownika."""
     user_id = current_user.id
-    supabase = get_supabase_anon()
+    supabase = get_supabase_service()
 
     try:
         paths_res, courses_res, lessons_res, progress_res = await asyncio.gather(
