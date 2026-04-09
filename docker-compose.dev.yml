@@ -12,6 +12,7 @@ services:
     environment:
       - VITE_SUPABASE_URL=${VITE_SUPABASE_URL}
       - VITE_SUPABASE_ANON_KEY=${VITE_SUPABASE_ANON_KEY}
+      - VITE_ADMIN_SECRET=${VITE_ADMIN_SECRET}
 
   fastapi:
     build:
@@ -25,4 +26,5 @@ services:
       - SUPABASE_URL=${SUPABASE_URL}
       - SUPABASE_SERVICE_KEY=${SUPABASE_SERVICE_KEY}
       - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+      - ADMIN_SECRET=${ADMIN_SECRET}
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload

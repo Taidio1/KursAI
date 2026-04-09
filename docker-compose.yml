@@ -7,9 +7,11 @@ services:
       args:
         - VITE_SUPABASE_URL=${VITE_SUPABASE_URL}
         - VITE_SUPABASE_ANON_KEY=${VITE_SUPABASE_ANON_KEY}
+        - VITE_ADMIN_SECRET=${VITE_ADMIN_SECRET}
     environment:
       - VITE_SUPABASE_URL=${VITE_SUPABASE_URL}
       - VITE_SUPABASE_ANON_KEY=${VITE_SUPABASE_ANON_KEY}
+      - VITE_ADMIN_SECRET=${VITE_ADMIN_SECRET}
 
   fastapi:
     build: ./backend
@@ -18,6 +20,7 @@ services:
       - SUPABASE_SERVICE_KEY=${SUPABASE_SERVICE_KEY}
       - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
       - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
+      - ADMIN_SECRET=${ADMIN_SECRET}
 
   nginx:
     image: nginx:alpine

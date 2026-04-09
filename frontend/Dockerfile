@@ -4,10 +4,12 @@ WORKDIR /app
 # Add build arguments for environment variables
 ARG VITE_SUPABASE_URL
 ARG VITE_SUPABASE_ANON_KEY
+ARG VITE_ADMIN_SECRET
 
 # Set them as environment variables so Vite can pick them up
 ENV VITE_SUPABASE_URL=$VITE_SUPABASE_URL
 ENV VITE_SUPABASE_ANON_KEY=$VITE_SUPABASE_ANON_KEY
+ENV VITE_ADMIN_SECRET=$VITE_ADMIN_SECRET
 
 COPY package.json .
 RUN npm install
