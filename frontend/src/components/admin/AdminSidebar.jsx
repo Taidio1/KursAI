@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { LayoutDashboard, BookOpen, Package, ArrowLeft } from 'lucide-react'
+import { LayoutDashboard, BookOpen, Package, ArrowLeft, Rss } from 'lucide-react'
 
 const SECTIONS = [
   { id: 'overview', label: 'Przegląd', icon: LayoutDashboard },
@@ -29,6 +29,15 @@ export default function AdminSidebar({ activeSection, onSectionChange }) {
             {label}
           </button>
         ))}
+
+        {/* Blog — osobna strona */}
+        <Link
+          to="/admin/blog"
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+        >
+          <Rss size={16} />
+          Blog
+        </Link>
       </nav>
 
       <div className="p-3 border-t border-border">
