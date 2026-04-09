@@ -26,6 +26,7 @@ export default function CoursePage() {
   const [sidebarPinned, setSidebarPinned] = useState(false)
   const [activeSlideIdx, setActiveSlideIdx] = useState(0)
   const [isPaused, setIsPaused] = useState(false)
+  const [courseCompleted, setCourseCompleted] = useState(false)
 
   const currentSlug = pathSlug || 'wspolna'
 
@@ -118,8 +119,9 @@ export default function CoursePage() {
     return () => window.removeEventListener('keydown', handler)
   }, [])
 
-  const progress = lessons.length > 0 
-    ? Math.round((completedLessons.size / lessons.length) * 100) 
+  const completedInPath = lessons.filter(l => completedLessons.has(l.id)).length
+  const progress = lessons.length > 0
+    ? Math.round((completedInPath / lessons.length) * 100)
     : 0
 
   const lesson = lessons[activeLessonIdx]
@@ -171,8 +173,7 @@ export default function CoursePage() {
     if (activeLessonIdx < lessons.length - 1) {
       setActiveLessonIdx(activeLessonIdx + 1)
     } else {
-      // Kurs ukończony – powrót do pierwszej lekcji (powtórka bez resetowania progresu)
-      setActiveLessonIdx(0)
+      setCourseCompleted(true)
     }
   }
 
@@ -215,6 +216,60 @@ export default function CoursePage() {
         >
           Spróbuj ponownie
         </button>
+      </div>
+    )
+  }
+
+  if (courseCompleted) {
+    return (
+      <div style={{
+        height: '100vh',
+        background: 'var(--bg-primary)',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: '24px',
+      }}>
+        <div style={{ fontSize: '48px' }}>🎉</div>
+        <h1 style={{ color: 'var(--cyan-light)', fontSize: '28px', fontWeight: '800', textAlign: 'center' }}>
+          Ścieżka ukończona!
+        </h1>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '16px', textAlign: 'center', maxWidth: '400px' }}>
+          Ukończyłeś wszystkie lekcje w ścieżce <strong>{path?.title}</strong>. Świetna robota!
+        </p>
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <button
+            onClick={() => navigate('/dashboard')}
+            style={{
+              background: 'var(--cyan)',
+              border: 'none',
+              borderRadius: '10px',
+              padding: '12px 28px',
+              color: 'white',
+              fontWeight: '700',
+              fontSize: '14px',
+              cursor: 'pointer',
+            }}
+          >
+            Wróć do Dashboard
+          </button>
+          <button
+            onClick={() => { setCourseCompleted(false); setActiveLessonIdx(0) }}
+            style={{
+              background: 'transparent',
+              border: '1px solid var(--border-subtle)',
+              borderRadius: '10px',
+              padding: '12px 28px',
+              color: 'var(--text-muted)',
+              fontWeight: '600',
+              fontSize: '14px',
+              cursor: 'pointer',
+            }}
+          >
+            Powtórz ścieżkę
+          </button>
+        </div>
       </div>
     )
   }
@@ -350,7 +405,7 @@ export default function CoursePage() {
                   Lekcje
                 </div>
                 <div style={{ color: 'var(--text-secondary)', fontSize: '12px', whiteSpace: 'nowrap' }}>
-                  {completedLessons.size} / {lessons.length} ukończone
+                  {completedInPath} / {lessons.length} ukończone
                 </div>
               </div>
             ) : (

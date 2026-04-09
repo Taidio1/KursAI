@@ -297,7 +297,7 @@ function RenderBlocks({ blocks }) {
           lineHeight: '1.8',
           marginBottom: '24px',
         }}
-          className="notion-markdown"
+          className="markdown-content"
         >
           <ReactMarkdown remarkPlugins={[remarkGfm]}>
             {block.content}
