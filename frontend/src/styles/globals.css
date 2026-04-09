@@ -1,32 +1,32 @@
 @import "tailwindcss";
 
 :root {
-  /* HSL Base - REFINED LIGHT MODE */
-  --background: 210 40% 98%;
+  /* HSL Base - EYE-COMFORTABLE LIGHT MODE */
+  --background: 214 32% 93%;
   --foreground: 222 47% 11%;
-  --card: 0 0% 100%;
+  --card: 210 22% 97%;
   --card-foreground: 222 47% 11%;
   --primary: 217 91% 60%;
   --primary-foreground: 210 40% 98%;
-  --secondary: 210 40% 96.1%;
+  --secondary: 213 28% 89%;
   --secondary-foreground: 222 47% 11.2%;
-  --muted: 210 40% 96.1%;
-  --muted-foreground: 215.4 16.3% 46.9%;
-  --accent: 210 40% 96.1%;
+  --muted: 213 28% 89%;
+  --muted-foreground: 215.4 18% 44%;
+  --accent: 213 28% 89%;
   --accent-foreground: 222 47% 11.2%;
-  --border: 214.3 32% 91%;
-  --input: 214.3 32% 91%;
+  --border: 214 24% 83%;
+  --input: 214 24% 83%;
   --ring: 222.2 84% 4.9%;
   --radius: 0.75rem;
-  --glass: 0 0% 100% / 0.6;
-  --glass-border: 214.3 32% 91% / 0.3;
-  --glow: 217 91% 60% / 0.05;
+  --glass: 210 22% 97% / 0.75;
+  --glass-border: 214 26% 80% / 0.5;
+  --glow: 217 91% 60% / 0.07;
 
   /* Legacy mapping for compatibility */
   --bg-primary: hsl(var(--background));
   --bg-secondary: hsl(var(--secondary));
-  --bg-surface: hsla(var(--foreground) / 0.05);
-  --bg-surface-hover: hsla(var(--foreground) / 0.08);
+  --bg-surface: hsla(var(--foreground) / 0.06);
+  --bg-surface-hover: hsla(var(--foreground) / 0.1);
   --border-subtle: hsl(var(--border));
   --text-primary: hsl(var(--foreground));
   --text-secondary: hsl(var(--muted-foreground));
