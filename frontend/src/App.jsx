@@ -7,6 +7,7 @@ import ProtectedRoute from './components/ProtectedRoute'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import DashboardPage from './pages/DashboardPage'
+import ProfilePage from './pages/ProfilePage'
 import AdminDashboardPage from './pages/AdminDashboardPage'
 import AdminEditorPage from './pages/AdminEditorPage'
 import MaterialsPage from './pages/MaterialsPage'
@@ -40,6 +41,14 @@ function AppRoutes() {
           element={
             <ProtectedRoute>
               <MaterialsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <ProfilePage />
             </ProtectedRoute>
           }
         />

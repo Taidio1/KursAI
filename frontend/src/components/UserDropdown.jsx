@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { ChevronDown, User, Settings, LogOut } from 'lucide-react'
 
@@ -45,10 +45,14 @@ export default function UserDropdown({ user }) {
               <p className="text-xs font-semibold text-foreground truncate">{user?.email}</p>
             </div>
             
-            <button className="flex w-full items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-accent transition-all group">
+            <Link 
+              to="/profile"
+              onClick={() => setIsOpen(false)}
+              className="flex w-full items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-accent transition-all group"
+            >
               <User size={15} className="text-muted-foreground group-hover:text-primary transition-colors" />
               Profil
-            </button>
+            </Link>
             <button className="flex w-full items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-accent transition-all group">
               <Settings size={15} className="text-muted-foreground group-hover:text-primary transition-colors" />
               Ustawienia
