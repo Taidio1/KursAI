@@ -87,28 +87,6 @@ export default function LandingPage() {
               </div>
             </section>
 
-            {/* Materiały */}
-            <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 border-t border-border">
-              <div className="flex items-center justify-between mb-8">
-                <div>
-                  <h2 className="text-2xl font-black tracking-tight mb-1">Biblioteka materiałów</h2>
-                  <p className="text-muted-foreground text-sm">Narzędzia, zasoby i linki zebrane w jednym miejscu</p>
-                </div>
-                <Link
-                  to="/login"
-                  className="text-[12px] font-bold uppercase tracking-wider text-primary hover:opacity-80 transition-all flex items-center gap-1"
-                >
-                  Przeglądaj <ArrowRight size={13} />
-                </Link>
-              </div>
-              <div className="rounded-2xl border border-border bg-card/30 p-8 text-center">
-                <p className="text-muted-foreground text-sm">Zaloguj się aby uzyskać dostęp do pełnej biblioteki materiałów</p>
-                <Link to="/register" className="inline-block mt-4 bg-primary text-primary-foreground font-bold px-5 py-2.5 rounded-xl text-sm hover:opacity-90 transition-all">
-                  Utwórz konto — to darmowe
-                </Link>
-              </div>
-            </section>
-
             {/* Blog preview */}
             <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 border-t border-border">
               <div className="flex items-center justify-between mb-8">
