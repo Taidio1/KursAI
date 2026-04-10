@@ -9,6 +9,8 @@ import SceneViewer from '../components/SceneViewer'
 import SceneControls from '../components/SceneControls'
 import { useSceneTimer } from '../hooks/useSceneTimer'
 import PageTransition from '../components/PageTransition'
+import { useIsMobile } from '../hooks/useIsMobile'
+import BottomSheet from '../components/BottomSheet'
 
 export default function CoursePage() {
   const { user } = useAuth()
@@ -29,6 +31,12 @@ export default function CoursePage() {
   const [activeSlideIdx, setActiveSlideIdx] = useState(0)
   const [isPaused, setIsPaused] = useState(false)
   const [courseCompleted, setCourseCompleted] = useState(false)
+  const isMobile = useIsMobile()
+  const [lessonSheetOpen, setLessonSheetOpen] = useState(false)
+
+  useEffect(() => {
+    if (!isMobile) setLessonSheetOpen(false)
+  }, [isMobile])
 
   const currentSlug = pathSlug || 'wspolna'
 
@@ -325,10 +333,14 @@ export default function CoursePage() {
             </svg>
             Dashboard
           </button>
-          <span style={{ color: 'var(--border-subtle)' }}>/</span>
-          <span style={{ color: 'var(--text-muted)', fontSize: '13px', whiteSpace: 'nowrap', flexShrink: 0 }}>
-            {path?.title || 'Ścieżka'}
-          </span>
+          {!isMobile && (
+            <>
+              <span style={{ color: 'var(--border-subtle)' }}>/</span>
+              <span style={{ color: 'var(--text-muted)', fontSize: '13px', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                {path?.title || 'Ścieżka'}
+              </span>
+            </>
+          )}
           {lesson && (
             <>
               <span style={{ color: 'var(--border-subtle)', flexShrink: 0 }}>/</span>
@@ -361,18 +373,20 @@ export default function CoursePage() {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div style={{ width: '100px', height: '4px', background: 'var(--bg-surface-hover)', borderRadius: '999px', overflow: 'hidden' }}>
-              <div style={{
-                width: `${progress}%`,
-                height: '100%',
-                background: 'var(--cyan-gradient)',
-                borderRadius: '999px',
-                transition: 'width 0.4s ease',
-              }} />
+          {!isMobile && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <div style={{ width: '100px', height: '4px', background: 'var(--bg-surface-hover)', borderRadius: '999px', overflow: 'hidden' }}>
+                <div style={{
+                  width: `${progress}%`,
+                  height: '100%',
+                  background: 'var(--cyan-gradient)',
+                  borderRadius: '999px',
+                  transition: 'width 0.4s ease',
+                }} />
+              </div>
+              <span style={{ color: 'var(--text-muted)', fontSize: '12px', whiteSpace: 'nowrap' }}>{progress}% ukończono</span>
             </div>
-            <span style={{ color: 'var(--text-muted)', fontSize: '12px', whiteSpace: 'nowrap' }}>{progress}% ukończono</span>
-          </div>
+          )}
           <button
             onClick={handleLogout}
             style={{
@@ -393,6 +407,7 @@ export default function CoursePage() {
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden', position: 'relative' }}>
 
         {/* Sidebar */}
+        {!isMobile && (
         <aside
           onMouseEnter={() => { if (!sidebarPinned) setSidebarOpen(true) }}
           onMouseLeave={() => { if (!sidebarPinned) setSidebarOpen(false) }}
@@ -512,8 +527,10 @@ export default function CoursePage() {
             })}
           </div>
         </aside>
+        )}
 
         {/* Pin button */}
+        {!isMobile && (
         <button
           onClick={() => {
             setSidebarPinned(p => !p)
@@ -553,6 +570,7 @@ export default function CoursePage() {
             <polyline points="9 18 15 12 9 6" />
           </svg>
         </button>
+        )}
 
         {/* Main Content */}
         <main style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
@@ -583,6 +601,32 @@ export default function CoursePage() {
           </div>
 
           {/* Scene Controls */}
+          {isMobile && (
+            <button
+              onClick={() => setLessonSheetOpen(true)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                width: '100%',
+                padding: '8px 16px',
+                background: 'var(--bg-surface)',
+                border: 'none',
+                borderTop: '1px solid var(--border-subtle)',
+                color: 'var(--text-secondary)',
+                fontSize: '13px',
+                fontWeight: '600',
+                cursor: 'pointer',
+              }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="8" y1="6" x2="21" y2="6" /><line x1="8" y1="12" x2="21" y2="12" /><line x1="8" y1="18" x2="21" y2="18" />
+                <line x1="3" y1="6" x2="3.01" y2="6" /><line x1="3" y1="12" x2="3.01" y2="12" /><line x1="3" y1="18" x2="3.01" y2="18" />
+              </svg>
+              Lekcje ({activeLessonIdx + 1}/{lessons.length})
+            </button>
+          )}
           {slides.length > 0 && !slidesLoading && (
             <SceneControls
               isPaused={isPaused}
@@ -599,6 +643,76 @@ export default function CoursePage() {
         </main>
       </div>
     </div>
+    {isMobile && (
+      <BottomSheet
+        isOpen={lessonSheetOpen}
+        onClose={() => setLessonSheetOpen(false)}
+        title={`Lekcje – ${path?.title || 'Ścieżka'}`}
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          {lessons.map((l, idx) => {
+            const isActive = idx === activeLessonIdx
+            const isDone = completedLessons.has(l.id)
+            return (
+              <button
+                key={l.id}
+                onClick={() => {
+                  setActiveLessonIdx(idx)
+                  setLessonSheetOpen(false)
+                }}
+                style={{
+                  width: '100%',
+                  background: isActive ? 'var(--cyan-dim)' : 'transparent',
+                  border: isActive ? '1px solid var(--cyan-border)' : '1px solid transparent',
+                  borderRadius: '10px',
+                  padding: '12px 14px',
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                  display: 'flex',
+                  gap: '12px',
+                  alignItems: 'center',
+                }}
+              >
+                <div style={{
+                  width: '22px',
+                  height: '22px',
+                  borderRadius: '50%',
+                  flexShrink: 0,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: isDone ? 'var(--cyan)' : isActive ? 'var(--cyan-dim)' : 'var(--bg-surface)',
+                  border: `1.5px solid ${isDone ? 'var(--cyan)' : isActive ? 'var(--cyan-border)' : 'var(--border-subtle)'}`,
+                }}>
+                  {isDone ? (
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  ) : (
+                    <span style={{ color: isActive ? 'var(--cyan-light)' : 'var(--text-muted)', fontSize: '10px', fontWeight: '700' }}>
+                      {idx + 1}
+                    </span>
+                  )}
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{
+                    color: isActive ? 'var(--cyan-light)' : isDone ? 'var(--text-secondary)' : 'var(--text-primary)',
+                    fontSize: '13px',
+                    fontWeight: isActive ? '600' : '400',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                  }}>
+                    {l.title}
+                  </div>
+                  <div style={{ color: 'var(--text-muted)', fontSize: '11px' }}>{l.duration}</div>
+                </div>
+              </button>
+            )
+          })}
+        </div>
+      </BottomSheet>
+    )}
     </PageTransition>
   )
 }
