@@ -81,6 +81,25 @@ export default function NavDrawer({ isOpen, onClose, user, role }) {
                   </Link>
                 )
               })}
+
+              {!user && (
+                <div className="mt-4 flex flex-col gap-2 px-2">
+                  <Link
+                    to="/login"
+                    onClick={onClose}
+                    className="flex items-center justify-center rounded-lg border border-border px-4 py-3 text-sm font-bold uppercase tracking-wider text-muted-foreground hover:bg-muted hover:text-foreground transition-all"
+                  >
+                    Zaloguj się
+                  </Link>
+                  <Link
+                    to="/register"
+                    onClick={onClose}
+                    className="flex items-center justify-center rounded-lg bg-primary px-4 py-3 text-sm font-bold uppercase tracking-wider text-primary-foreground hover:opacity-90 transition-all"
+                  >
+                    Zarejestruj
+                  </Link>
+                </div>
+              )}
             </nav>
 
             {/* Footer */}

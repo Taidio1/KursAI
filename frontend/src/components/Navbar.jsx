@@ -102,13 +102,13 @@ export default function Navbar() {
               <ThemeToggle />
               <Link
                 to="/login"
-                className="text-[12px] font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-all border border-border rounded-full px-4 py-1.5"
+                className="hidden md:inline-flex text-[12px] font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-all border border-border rounded-full px-4 py-1.5"
               >
                 Zaloguj się
               </Link>
               <Link
                 to="/register"
-                className="text-[12px] font-bold uppercase tracking-wider bg-primary text-primary-foreground rounded-full px-4 py-1.5 hover:opacity-90 transition-all"
+                className="hidden md:inline-flex text-[12px] font-bold uppercase tracking-wider bg-primary text-primary-foreground rounded-full px-4 py-1.5 hover:opacity-90 transition-all"
               >
                 Zarejestruj
               </Link>
