@@ -8,6 +8,7 @@ import Navbar from '../components/Navbar';
 import { Search } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import PageTransition from '../components/PageTransition';
+import BottomSheet from '../components/BottomSheet';
 
 export default function MaterialsPage() {
   const { user } = useAuth();
@@ -21,6 +22,7 @@ export default function MaterialsPage() {
   });
   const [gridCols, setGridCols] = useState(3);
   const [selectedMaterialId, setSelectedMaterialId] = useState(null);
+  const [filterSheetOpen, setFilterSheetOpen] = useState(false);
   const [fetchError, setFetchError] = useState(null);
 
   useEffect(() => {
@@ -105,22 +107,25 @@ export default function MaterialsPage() {
       
       <div className="flex-1 overflow-y-auto custom-scrollbar">
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-          <MaterialsHeader 
+          <MaterialsHeader
             search={filters.search}
             onSearchChange={handleSearchChange}
             gridCols={gridCols}
             onGridChange={setGridCols}
             totalCount={materials.length}
             filteredCount={filteredMaterials.length}
+            onOpenFilters={() => setFilterSheetOpen(true)}
           />
 
           <div className="flex flex-col md:flex-row gap-8 mt-4">
-            <MaterialSidebar 
-              filters={filters} 
-              setFilters={setFilters} 
-              categories={categories} 
-              allTags={allTags}
-            />
+            <div className="hidden md:block">
+              <MaterialSidebar
+                filters={filters}
+                setFilters={setFilters}
+                categories={categories}
+                allTags={allTags}
+              />
+            </div>
             
             <div className="flex-1 min-w-0">
               {loading ? (
@@ -183,6 +188,19 @@ export default function MaterialsPage() {
         />
       )}
     </div>
+
+      <BottomSheet
+        isOpen={filterSheetOpen}
+        onClose={() => setFilterSheetOpen(false)}
+        title="Filtry"
+      >
+        <MaterialSidebar
+          filters={filters}
+          setFilters={setFilters}
+          categories={categories}
+          allTags={allTags}
+        />
+      </BottomSheet>
     </PageTransition>
   );
 }
