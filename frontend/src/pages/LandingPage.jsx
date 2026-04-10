@@ -1,8 +1,10 @@
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import Navbar from '../components/Navbar'
 import PageTransition from '../components/PageTransition'
 import { ArrowRight, BookOpen, Layers, Code2, Package } from 'lucide-react'
+import { blogService } from '../services/blogService'
 
 const PATHS = [
   {
@@ -136,14 +138,100 @@ export default function LandingPage() {
 }
 
 function BlogPreview() {
-  // Statyczny placeholder — widoczny bez ładowania danych
+  const [posts, setPosts] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    blogService.getPosts()
+      .then(data => setPosts(data.slice(0, 3)))
+      .catch(err => console.error('Error fetching posts:', err))
+      .finally(() => setLoading(false))
+  }, [])
+
+  if (loading) {
+    return (
+      <div className="grid gap-6 md:grid-cols-3">
+        {[1, 2, 3].map(i => (
+          <div key={i} className="h-48 rounded-2xl bg-card/30 animate-pulse" />
+        ))}
+      </div>
+    )
+  }
+
+  if (posts.length === 0) {
+    return (
+      <div className="rounded-2xl border border-border bg-card/30 p-8 text-center">
+        <BookOpen size={24} className="mx-auto mb-3 text-muted-foreground" />
+        <p className="text-muted-foreground text-sm">Wpisy pojawią się tutaj wkrótce.</p>
+        <Link to="/blog" className="inline-block mt-4 text-primary text-sm font-bold hover:opacity-80">
+          Przejdź do bloga →
+        </Link>
+      </div>
+    )
+  }
+
   return (
-    <div className="rounded-2xl border border-border bg-card/30 p-8 text-center">
-      <BookOpen size={24} className="mx-auto mb-3 text-muted-foreground" />
-      <p className="text-muted-foreground text-sm">Wpisy pojawią się tutaj wkrótce.</p>
-      <Link to="/blog" className="inline-block mt-4 text-primary text-sm font-bold hover:opacity-80">
-        Przejdź do bloga →
-      </Link>
+    <div className="grid gap-6 md:grid-cols-3">
+      {posts.map((post, index) => (
+        <LandingPostCard key={post.id || index} post={post} isLatest={index === 0} />
+      ))}
     </div>
+  )
+}
+
+function LandingPostCard({ post, isLatest }) {
+  const publishedDate = post.published_at 
+    ? new Date(post.published_at).toLocaleDateString('pl-PL')
+    : new Date().toLocaleDateString('pl-PL');
+
+  return (
+    <Link 
+      to={`/blog/${post.slug}`} 
+      className={`group block p-4 rounded-2xl border border-border transition-all hover:border-primary/50 ${
+        isLatest ? 'bg-primary/5' : 'bg-card/30'
+      }`}
+    >
+      <div className="relative aspect-video rounded-xl overflow-hidden bg-muted mb-4">
+        {post.cover_image ? (
+          <img 
+            src={post.cover_image} 
+            alt={post.title}
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-secondary/30">
+            <BookOpen size={32} className="text-muted-foreground/50" />
+          </div>
+        )}
+        
+        {isLatest && (
+          <div className="absolute top-3 left-3 flex items-center gap-2 bg-primary text-white text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-lg shadow-lg">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+            </span>
+            Nowy wpis
+          </div>
+        )}
+      </div>
+
+      <div className="space-y-2">
+        <h3 className="font-black text-sm line-clamp-1 group-hover:text-primary transition-colors">
+          {post.title}
+        </h3>
+        <p className="text-muted-foreground text-[12px] line-clamp-2 leading-relaxed">
+          {post.lead || 'Kliknij aby przeczytać więcej...'}
+        </p>
+        
+        <div className="pt-2 flex items-center justify-between border-t border-border/50">
+          <div className="text-primary text-[10px] font-bold">
+            Czytaj więcej →
+          </div>
+          <div className="text-muted-foreground/60 text-[10px] font-medium">
+            {publishedDate}
+          </div>
+        </div>
+      </div>
+    </Link>
   )
 }
