@@ -1,6 +1,13 @@
+import { useEffect } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 
 export default function BottomSheet({ isOpen, onClose, title, children }) {
+  useEffect(() => {
+    const handleEsc = (e) => { if (e.key === 'Escape' && isOpen) onClose() }
+    document.addEventListener('keydown', handleEsc)
+    return () => document.removeEventListener('keydown', handleEsc)
+  }, [isOpen, onClose])
+
   return (
     <AnimatePresence>
       {isOpen && (
