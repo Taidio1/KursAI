@@ -8,6 +8,12 @@ export default function BottomSheet({ isOpen, onClose, title, children }) {
     return () => document.removeEventListener('keydown', handleEsc)
   }, [isOpen, onClose])
 
+  useEffect(() => {
+    if (isOpen) document.body.style.overflow = 'hidden'
+    else document.body.style.overflow = ''
+    return () => { document.body.style.overflow = '' }
+  }, [isOpen])
+
   return (
     <AnimatePresence>
       {isOpen && (

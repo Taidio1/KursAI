@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, LayoutGrid, Grid3X3, Grid2X2 } from "lucide-react";
+import { Search, LayoutGrid, Grid3X3, Grid2X2, SlidersHorizontal } from "lucide-react";
 
 export default function MaterialsHeader({
   search,
@@ -8,6 +8,7 @@ export default function MaterialsHeader({
   onGridChange,
   totalCount,
   filteredCount,
+  onOpenFilters,
 }) {
   return (
     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8">
@@ -21,8 +22,17 @@ export default function MaterialsHeader({
       </div>
 
       <div className="flex items-center gap-3">
+        {/* Mobile filters button */}
+        <button
+          onClick={onOpenFilters}
+          className="md:hidden flex items-center gap-2 glass rounded-xl px-3 py-2 text-sm font-semibold text-muted-foreground hover:text-foreground transition-all"
+        >
+          <SlidersHorizontal size={15} />
+          Filtry
+        </button>
+
         {/* Search */}
-        <div className="relative group min-w-[300px]">
+        <div className="relative group w-full sm:min-w-[300px]">
           <Search
             size={16}
             className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none transition-colors group-focus-within:text-primary"

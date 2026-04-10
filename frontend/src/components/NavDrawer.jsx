@@ -7,12 +7,18 @@ import ThemeToggle from './ThemeToggle'
 export default function NavDrawer({ isOpen, onClose, user, role }) {
   const location = useLocation()
 
-  // Close on ESC
+  // Close on ESC + lock body scroll
   useEffect(() => {
     const handler = (e) => { if (e.key === 'Escape' && isOpen) onClose() }
     document.addEventListener('keydown', handler)
     return () => document.removeEventListener('keydown', handler)
   }, [isOpen, onClose])
+
+  useEffect(() => {
+    if (isOpen) document.body.style.overflow = 'hidden'
+    else document.body.style.overflow = ''
+    return () => { document.body.style.overflow = '' }
+  }, [isOpen])
 
   const links = [
     { to: '/dashboard', label: 'Kursy', icon: LayoutDashboard },
