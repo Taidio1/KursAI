@@ -1,11 +1,14 @@
+import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import UserDropdown from './UserDropdown'
 import ThemeToggle from './ThemeToggle'
+import NavDrawer from './NavDrawer'
 import { useAuth } from '../contexts/AuthContext'
-import { LayoutDashboard, Library, ShieldCheck, BookOpen } from 'lucide-react'
+import { LayoutDashboard, Library, ShieldCheck, BookOpen, Menu } from 'lucide-react'
 
 export default function Navbar() {
   const { user, role } = useAuth()
+  const [drawerOpen, setDrawerOpen] = useState(false)
   const location = useLocation()
   const navigate = useNavigate()
 
@@ -15,6 +18,7 @@ export default function Navbar() {
   const isBlog = location.pathname.startsWith('/blog')
 
   return (
+  <>
     <nav className="sticky top-0 z-[100] w-full border-b border-border bg-background/80 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-8">
@@ -76,11 +80,25 @@ export default function Navbar() {
                 Beta Access
               </div>
               <div className="mx-1 hidden h-5 w-px bg-border sm:block" />
+              <button
+                className="md:hidden flex items-center justify-center rounded-md p-1.5 text-muted-foreground hover:text-foreground transition-colors"
+                onClick={() => setDrawerOpen(true)}
+                aria-label="Otwórz menu"
+              >
+                <Menu size={22} />
+              </button>
               <ThemeToggle />
               <UserDropdown user={user} />
             </>
           ) : (
             <>
+              <button
+                className="md:hidden flex items-center justify-center rounded-md p-1.5 text-muted-foreground hover:text-foreground transition-colors"
+                onClick={() => setDrawerOpen(true)}
+                aria-label="Otwórz menu"
+              >
+                <Menu size={22} />
+              </button>
               <ThemeToggle />
               <Link
                 to="/login"
@@ -99,5 +117,7 @@ export default function Navbar() {
         </div>
       </div>
     </nav>
+    <NavDrawer isOpen={drawerOpen} onClose={() => setDrawerOpen(false)} user={user} role={role} />
+  </>
   )
 }
