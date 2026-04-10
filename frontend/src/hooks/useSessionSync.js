@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 
-const SESSION_KEY_STORAGE = 'kursai-session-key'
+const SESSION_KEY_STORAGE = 'agentic-hub-session-key'
 
 async function registerSession(userId) {
   let key = sessionStorage.getItem(SESSION_KEY_STORAGE)

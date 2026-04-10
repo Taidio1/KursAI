@@ -99,7 +99,7 @@ export default function LoginPage() {
     <div style={styles.page}>
       <form style={styles.card} onSubmit={handleSubmit}>
         <div>
-          <div style={styles.logo}>KursAI 2026</div>
+          <div style={styles.logo}>Agentic Hub 2026</div>
           <div style={styles.title}>Zaloguj się do kursu</div>
         </div>
         <input

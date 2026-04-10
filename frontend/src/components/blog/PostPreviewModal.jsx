@@ -78,6 +78,13 @@ export default function PostPreviewModal({ post, onClose }) {
             <span>{formatDate(post.published_at || post.created_at)}</span>
           </div>
 
+          {/* Cover image */}
+          {post.cover_image && (
+            <figure className="mb-6 rounded-2xl overflow-hidden border border-border bg-muted">
+              <img src={post.cover_image} alt={`Okładka wpisu: ${post.title}`} className="w-full max-h-[400px] object-cover" />
+            </figure>
+          )}
+
           {/* Divider */}
           <div className="border-t border-border mb-6" />
 

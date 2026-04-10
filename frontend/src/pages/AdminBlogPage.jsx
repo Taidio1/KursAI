@@ -157,6 +157,11 @@ export default function AdminBlogPage() {
           {!loading && filtered.map(post => (
             <div key={post.id} className="border border-border rounded-xl p-5 mb-3 bg-card/30 hover:bg-card/50 transition-colors">
               <div className="flex items-start justify-between gap-4">
+                {post.cover_image && (
+                  <div className="hidden sm:block flex-shrink-0 w-32 aspect-video rounded-lg overflow-hidden border border-border mt-1">
+                    <img src={post.cover_image} alt="" className="w-full h-full object-cover" />
+                  </div>
+                )}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-2">
                     <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${STATUS_COLORS[post.status]}`}>

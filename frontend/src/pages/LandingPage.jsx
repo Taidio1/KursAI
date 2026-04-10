@@ -43,7 +43,7 @@ export default function LandingPage() {
             {/* Hero */}
             <section className="mx-auto max-w-7xl px-4 pt-24 pb-16 sm:px-6 lg:px-8 text-center">
               <div className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/50 px-4 py-1.5 text-[11px] font-bold uppercase tracking-widest text-muted-foreground mb-8">
-                Kurs AI 2026
+                Agentic Hub 2026
               </div>
               <h1 className="text-5xl font-black tracking-tight leading-tight mb-6 lg:text-6xl">
                 Jak efektywnie<br />
@@ -126,7 +126,7 @@ export default function LandingPage() {
 
             {/* Footer */}
             <footer className="border-t border-border py-8 text-center text-xs text-muted-foreground">
-              © 2026 KursAI — Jak efektywnie używać AI
+              © 2026 Agentic Hub — Jak efektywnie używać AI
             </footer>
           </main>
         </div>

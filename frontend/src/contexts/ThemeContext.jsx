@@ -4,7 +4,7 @@ const ThemeContext = createContext();
 
 export const ThemeProvider = ({ children }) => {
   const [theme, setTheme] = useState(() => {
-    const saved = localStorage.getItem('kursai-theme');
+    const saved = localStorage.getItem('agentic-hub-theme');
     if (saved) return saved;
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   });
@@ -13,7 +13,7 @@ export const ThemeProvider = ({ children }) => {
     const root = window.document.documentElement;
     root.classList.remove('light', 'dark');
     root.classList.add(theme);
-    localStorage.setItem('kursai-theme', theme);
+    localStorage.setItem('agentic-hub-theme', theme);
   }, [theme]);
 
   const toggleTheme = () => {

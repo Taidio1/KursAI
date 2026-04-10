@@ -4,7 +4,7 @@ import { useSessionSync } from '../hooks/useSessionSync'
 
 export const AuthContext = createContext(null)
 
-const ROLE_CACHE_KEY = 'kursai-role'
+const ROLE_CACHE_KEY = 'agentic-hub-role'
 
 async function fetchRole(userId) {
   const { data } = await supabase

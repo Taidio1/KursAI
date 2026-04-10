@@ -30,6 +30,7 @@ class BlogPostAdmin(BaseModel):
     author: str
     created_at: Optional[datetime]
     content_markdown: Optional[str] = None
+    cover_image: Optional[str] = None
 
 
 class BlogPostPatch(BaseModel):
@@ -41,6 +42,7 @@ class BlogPostPatch(BaseModel):
     tags: Optional[List[str]] = None
     author: Optional[str] = None
     content_markdown: Optional[str] = None
+    cover_image: Optional[str] = None
 
 
 @router.get("/posts", response_model=List[BlogPostAdmin])
@@ -50,7 +52,7 @@ async def get_all_posts(x_admin_secret: Optional[str] = Header(None)):
     try:
         response = (
             supabase.table("blog_posts")
-            .select("id, slug, title, lead, tags, status, scheduled_at, published_at, reading_time, author, created_at, content_markdown")
+            .select("id, slug, title, lead, tags, status, scheduled_at, published_at, reading_time, author, created_at, content_markdown, cover_image")
             .order("created_at", desc=True)
             .execute()
         )
@@ -66,6 +68,7 @@ class BlogPostCreate(BaseModel):
     tags: Optional[List[str]] = []
     content_markdown: Optional[str] = ""
     status: Optional[str] = "draft"
+    cover_image: Optional[str] = None
 
 
 @router.post("/posts", status_code=201)
@@ -100,6 +103,7 @@ async def create_post(
         "content_markdown": body.content_markdown,
         "status": body.status,
         "slug": slug,
+        "cover_image": body.cover_image,
     }
     try:
         response = supabase.table("blog_posts").insert(data).execute()
@@ -181,8 +185,9 @@ async def upload_image(
         raise HTTPException(status_code=500, detail=f"Błąd Supabase Storage: {str(e)}")
 
     # Zbuduj publiczny URL
-    supabase_url = os.environ.get("SUPABASE_URL", "")
-    public_url = f"{supabase_url}/storage/v1/object/public/blog-images/{storage_path}"
+    supabase_url = os.environ.get("SUPABASE_URL", "").strip().rstrip("/")
+    # Append a timestamp to prevent the browser from caching a 404 if the storage bucket takes a second to replicate
+    public_url = f"{supabase_url}/storage/v1/object/public/blog-images/{storage_path}?t={int(datetime.now(timezone.utc).timestamp())}"
 
     return {"url": public_url}
 

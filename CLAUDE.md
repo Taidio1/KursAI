@@ -1,4 +1,4 @@
-# CLAUDE.md – Projekt: Kurs AI 2026
+# CLAUDE.md – Projekt: Agentic Hub 2026
 
 ## Opis projektu
 
@@ -31,7 +31,7 @@ Aplikacja odczytuje i zapisuje treści kursu bezpośrednio w bazie danych Supaba
 - **Supabase JS Client** (`@supabase/supabase-js`) – auth + bezpośrednie zapytania do danych
 - **React Router** – routing
 - Zmienne środowiskowe: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_API_URL`, `VITE_ADMIN_SECRET`
-- Auth przez Supabase Auth (sesja w `kursai-auth-token`)
+- Auth przez Supabase Auth (sesja w `agentic-hub-auth-token`)
 
 ### Backend
 - **Python FastAPI** – kod w `backend/`
@@ -108,7 +108,7 @@ Aplikacja odczytuje i zapisuje treści kursu bezpośrednio w bazie danych Supaba
 ## Struktura projektu
 
 ```
-KursAI/
+AgenticHub/
 ├── CLAUDE.md                    # Ten plik – instrukcje dla Claude
 ├── GEMINI.md                    # Instrukcje dla Gemini CLI
 ├── table_of_content.md          # Spis treści całego kursu

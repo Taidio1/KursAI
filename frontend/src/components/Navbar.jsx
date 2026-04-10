@@ -14,30 +14,22 @@ export default function Navbar() {
   const isAdmin = location.pathname.startsWith('/admin')
   const isBlog = location.pathname.startsWith('/blog')
 
-  const handleProtectedLink = (e, path) => {
-    if (!user) {
-      e.preventDefault()
-      navigate('/login')
-    }
-  }
-
   return (
     <nav className="sticky top-0 z-[100] w-full border-b border-border bg-background/80 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-8">
           <Link to="/" className="group flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary shadow-lg shadow-primary/20 transition-transform group-hover:scale-110">
-              <span className="font-black text-lg italic tracking-tighter text-primary-foreground">K</span>
+              <span className="font-black text-lg italic tracking-tighter text-primary-foreground">AH</span>
             </div>
             <span className="text-xl font-black uppercase tracking-tighter transition-all hover:text-primary">
-              KursAI
+              Agentic Hub
             </span>
           </Link>
 
           <div className="hidden items-center gap-6 md:flex">
             <Link
               to="/dashboard"
-              onClick={(e) => handleProtectedLink(e, '/dashboard')}
               className={`flex items-center gap-2 text-[12px] font-bold uppercase tracking-wider transition-all ${
                 isDashboard ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
               }`}
@@ -47,7 +39,6 @@ export default function Navbar() {
             </Link>
             <Link
               to="/materials"
-              onClick={(e) => handleProtectedLink(e, '/materials')}
               className={`flex items-center gap-2 text-[12px] font-bold uppercase tracking-wider transition-all ${
                 isMaterials ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
               }`}

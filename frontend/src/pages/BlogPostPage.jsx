@@ -78,6 +78,13 @@ export default function BlogPostPage() {
                 )}
               </div>
 
+              {/* Okladka */}
+              {post.cover_image && (
+                <figure className="mb-10 rounded-2xl overflow-hidden border border-border bg-muted shadow-sm">
+                  <img src={post.cover_image} alt={`Okładka wpisu: ${post.title}`} className="w-full max-h-[450px] object-cover" />
+                </figure>
+              )}
+
               {/* Treść Markdown */}
               <div className="prose-blog">
                 <ReactMarkdown

@@ -56,7 +56,7 @@ export default function MaterialCard({ material, onTagClick, onSelect, isSelecte
             <h3 className="font-semibold text-foreground text-sm leading-tight group-hover:text-primary transition-colors truncate">
               {material.title}
             </h3>
-            <p className="text-xs text-muted-foreground mt-0.5 truncate">{material.author || 'KursAI'}</p>
+            <p className="text-xs text-muted-foreground mt-0.5 truncate">{material.author || 'Agentic Hub'}</p>
           </div>
         </div>
         <span className={`text-[10px] px-2 py-0.5 rounded-full border font-bold ${

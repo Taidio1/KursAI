@@ -108,7 +108,7 @@ export default function RegisterPage() {
     <div style={styles.page}>
       <form style={styles.card} onSubmit={handleSubmit}>
         <div>
-          <div style={styles.logo}>KursAI 2026</div>
+          <div style={styles.logo}>Agentic Hub 2026</div>
           <div style={styles.title}>Utwórz konto</div>
         </div>
         <input

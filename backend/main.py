@@ -14,7 +14,7 @@ async def lifespan(app: FastAPI):
     yield
     task.cancel()
 
-app = FastAPI(title="KursAI API", version="1.0.0", lifespan=lifespan)
+app = FastAPI(title="Agentic Hub API", version="1.0.0", lifespan=lifespan)
 
 _raw_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:80")
 allowed_origins = [o.strip() for o in _raw_origins.split(",") if o.strip()]

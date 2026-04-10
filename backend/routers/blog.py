@@ -16,6 +16,7 @@ class BlogPostSummary(BaseModel):
     published_at: Optional[datetime]
     reading_time: Optional[int]
     author: str
+    cover_image: Optional[str] = None
 
 class BlogPostFull(BlogPostSummary):
     content_markdown: str
@@ -26,7 +27,7 @@ async def get_blog_posts():
     try:
         response = (
             supabase.table("blog_posts")
-            .select("id, slug, title, lead, tags, published_at, reading_time, author")
+            .select("id, slug, title, lead, tags, published_at, reading_time, author, cover_image")
             .eq("status", "published")
             .order("published_at", desc=True)
             .execute()
@@ -41,7 +42,7 @@ async def get_blog_post(slug: str):
     try:
         response = (
             supabase.table("blog_posts")
-            .select("id, slug, title, lead, content_markdown, tags, published_at, reading_time, author")
+            .select("id, slug, title, lead, content_markdown, tags, published_at, reading_time, author, cover_image")
             .eq("status", "published")
             .eq("slug", slug)
             .single()

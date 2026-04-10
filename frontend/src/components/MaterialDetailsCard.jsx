@@ -83,7 +83,7 @@ export default function MaterialDetailsCard({ material, onClose, onTagClick }) {
                   <div className="min-w-0">
                     <h2 className="text-2xl sm:text-3xl font-bold text-foreground leading-tight tracking-tight">{material.title}</h2>
                     <div className="flex items-center flex-wrap gap-2 text-sm mt-1">
-                      <span className="font-medium text-foreground/70">{material.author || 'KursAI'}</span>
+                      <span className="font-medium text-foreground/70">{material.author || 'Agentic Hub'}</span>
                       <span className="w-1 h-1 rounded-full bg-muted-foreground/30 hidden sm:block"></span>
                       <span className="px-2 py-0.5 rounded-md bg-primary/5 text-primary/80 font-medium">{material.category}</span>
                     </div>

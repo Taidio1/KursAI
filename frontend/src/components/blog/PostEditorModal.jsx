@@ -386,6 +386,9 @@ export default function PostEditorModal({ post, onClose, onSave, saving, isNew =
   const [author, setAuthor] = useState(post?.author || '')
   const [tags, setTags] = useState(post?.tags || [])
   const [tagInput, setTagInput] = useState('')
+  const [coverImage, setCoverImage] = useState(post?.cover_image || '')
+  const [coverUploading, setCoverUploading] = useState(false)
+  const [coverError, setCoverError] = useState(null)
   const [showPreview, setShowPreview] = useState(false)
   const [imageDialogOpen, setImageDialogOpen] = useState(false)
 
@@ -435,6 +438,23 @@ export default function PostEditorModal({ post, onClose, onSave, saving, isNew =
     editor.chain().focus().setImage({ src: url, alt: alt || '' }).run()
   }
 
+  // ---- cover image upload ----
+  const handleCoverUpload = async (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setCoverError(null)
+    setCoverUploading(true)
+    try {
+      const { blogService } = await import('../../services/blogService')
+      const { url } = await blogService.uploadImage(file)
+      setCoverImage(url)
+    } catch (err) {
+      setCoverError(err.message || 'Błąd wgrywania okładki')
+    } finally {
+      setCoverUploading(false)
+    }
+  }
+
   // ---- save ----
   const handleSave = () => {
     const content_markdown = editor?.storage?.markdown?.getMarkdown?.() ?? ''
@@ -444,6 +464,7 @@ export default function PostEditorModal({ post, onClose, onSave, saving, isNew =
       author: author.trim(),
       tags,
       content_markdown,
+      cover_image: coverImage.trim() || null,
     })
   }
 
@@ -454,6 +475,7 @@ export default function PostEditorModal({ post, onClose, onSave, saving, isNew =
     lead,
     author,
     tags,
+    cover_image: coverImage,
     content_markdown: editor?.storage?.markdown?.getMarkdown?.() ?? '',
   }
 
@@ -524,6 +546,50 @@ export default function PostEditorModal({ post, onClose, onSave, saving, isNew =
                 placeholder="Krótki opis 1-2 zdania…"
                 className="w-full bg-background border border-border rounded-xl px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/40 outline-none focus:ring-1 focus:ring-primary/50 resize-none leading-relaxed transition-all"
               />
+            </div>
+
+            {/* Cover image */}
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Okładka (cover image)</label>
+              <div className="flex gap-2">
+                <input
+                  type="url"
+                  value={coverImage}
+                  onChange={e => { setCoverImage(e.target.value); setCoverError(null) }}
+                  placeholder="https://… wklej URL lub wgraj plik →"
+                  className="flex-1 bg-background border border-border rounded-xl px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/40 outline-none focus:ring-1 focus:ring-primary/50 transition-all"
+                />
+                <label className="shrink-0 flex items-center gap-1.5 px-3 py-2 text-[11px] font-bold rounded-xl border border-border text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all cursor-pointer">
+                  {coverUploading ? (
+                    <span className="w-3 h-3 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                  ) : (
+                    <ImageIcon size={13} />
+                  )}
+                  Wgraj
+                  <input
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp,image/gif"
+                    className="sr-only"
+                    onChange={handleCoverUpload}
+                    disabled={coverUploading}
+                  />
+                </label>
+              </div>
+              {coverError && (
+                <p className="text-xs text-red-400 bg-red-500/10 rounded-lg px-3 py-1.5">⚠️ {coverError}</p>
+              )}
+              {coverImage && (
+                <div className="relative w-full aspect-[3/1] rounded-xl overflow-hidden border border-border bg-muted">
+                  <img src={coverImage} alt="podgląd okładki" className="w-full h-full object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => setCoverImage('')}
+                    className="absolute top-2 right-2 w-6 h-6 flex items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80 transition-colors"
+                  >
+                    <X size={11} />
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Author */}

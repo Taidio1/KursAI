@@ -38,8 +38,8 @@ function AppRoutes() {
         <Route path="/register" element={<RegisterPage />} />
 
         {/* Chronione */}
-        <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
-        <Route path="/materials" element={<ProtectedRoute><MaterialsPage /></ProtectedRoute>} />
+        <Route path="/dashboard" element={<ProtectedRoute showLoginRequired><DashboardPage /></ProtectedRoute>} />
+        <Route path="/materials" element={<ProtectedRoute showLoginRequired><MaterialsPage /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
         <Route
           path="/kurs/:pathSlug"

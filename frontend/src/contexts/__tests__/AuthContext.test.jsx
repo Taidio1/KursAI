@@ -81,11 +81,11 @@ it('provides user from session and fetches role', async () => {
     expect(screen.getByText('user:user-123 role:user')).toBeInTheDocument()
   })
 
-  expect(localStorage.getItem('kursai-role')).toBe('user')
+  expect(localStorage.getItem('agentic-hub-role')).toBe('user')
 })
 
 it('initializes role from localStorage without waiting for fetchRole', async () => {
-  localStorage.setItem('kursai-role', 'admin')
+  localStorage.setItem('agentic-hub-role', 'admin')
   const { supabase } = await import('../../lib/supabase')
 
   // fetchRole nigdy nie resolve'uje — sprawdzamy rolę z cache zanim serwer odpowie
@@ -119,7 +119,7 @@ it('initializes role from localStorage without waiting for fetchRole', async () 
 })
 
 it('clears role from localStorage on SIGNED_OUT', async () => {
-  localStorage.setItem('kursai-role', 'user')
+  localStorage.setItem('agentic-hub-role', 'user')
   const { supabase } = await import('../../lib/supabase')
   supabase.auth.onAuthStateChange.mockImplementation((cb) => {
     cb('SIGNED_OUT', null)
@@ -132,6 +132,6 @@ it('clears role from localStorage on SIGNED_OUT', async () => {
     expect(screen.queryByText('Loading...')).not.toBeInTheDocument()
   })
 
-  expect(localStorage.getItem('kursai-role')).toBeNull()
+  expect(localStorage.getItem('agentic-hub-role')).toBeNull()
   expect(screen.getByText('no-user role:null')).toBeInTheDocument()
 })
